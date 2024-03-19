@@ -1,0 +1,6 @@
+Tooltip_EN = {
+    -- Toothbrush
+    Tooltip_AQToothbrush = "Can be used to brush your teeth.",
+    -- Toothpaste
+    Tooltip_AQToothpaste = "Can be used with a toothbrush to brush your teeth.",
+}

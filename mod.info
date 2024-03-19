@@ -1,0 +1,7 @@
+name=aoqia's toothbrush mod
+id=aoqia_toothbrush_mod
+description=This is a toothbrush mod that is integrated with Excrementum. Idea was from Madman's Toothpase Emporium which hasn't been updated in yonks.
+poster=poster.png
+require=ItemTweakerAPI
+versionMin=41.78.16
+modVersion=1.0.0
