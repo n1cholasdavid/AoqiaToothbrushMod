@@ -3,14 +3,10 @@
 -- -------------------------------------------------------------------------- --
 
 local AQEvents = require("AQEvents")
-local AQTranslations = require("ISUI/AQTranslations")
-local AQTweaks = require("AQTweaks")
 local AQUtils = require("AQUtils")
 
 -- ------------------------------- Entrypoint ------------------------------- --
 
-AQTranslations:updateCache()
-AQEvents:init()
-AQTweaks:init()
+AQEvents.register()
 
 AQUtils.logdebug("Up and running!")
