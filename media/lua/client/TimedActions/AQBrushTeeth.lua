@@ -2,12 +2,11 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
-local math = math
-
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 
-local AQGlobals = require("AQGlobals")
+local AQConstants = require("AQConstants")
+local AQModData = require("AQModData")
 local AQUtils = require("AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
@@ -50,10 +49,18 @@ function AQBrushTeeth:perform()
     sendVisual(self.character)
     ISTakeWaterAction.SendTakeWaterCommand(self.character, self.sink, 1)
 
-    local bodyDamage = self.character:getBodyDamage()
-    bodyDamage:setUnhappynessLevel(AQUtils.clamp(bodyDamage:getUnhappynessLevel() - 10, 0, 100))
+    -- Update player mod data
 
-    AQGlobals.daysWithoutBrushingTeeth = 0
+    ---@type AQModDataStruct
+    local data = ModData.get(AQConstants.MOD_ID)
+    data.daysWithoutBrushingTeeth = 0
+    data.timesBrushedTeethToday = data.timesBrushedTeethToday + 1
+
+    if data.timesBrushedTeethToday <= 2 then
+        -- Decrease the unhappy
+        local bodyDamage = self.character:getBodyDamage()
+        bodyDamage:setUnhappynessLevel(AQUtils.clamp(bodyDamage:getUnhappynessLevel() - 10, 0, 100))
+    end
 
     ISBaseTimedAction.perform(self)
 end
