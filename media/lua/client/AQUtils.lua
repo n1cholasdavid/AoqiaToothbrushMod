@@ -15,6 +15,11 @@ function AQUtils.logdebug(msg)
     end
 end
 
+---@param msg string
+function AQUtils.logerror(msg)
+    error("[" .. AQConstants.MOD_ID .. "] " .. msg, 1)
+end
+
 ---@param num number
 ---@param min number
 ---@param max number
