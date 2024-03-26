@@ -2,6 +2,12 @@
 --                 Handles the context menu for world objects.                --
 -- -------------------------------------------------------------------------- --
 
+local math = math
+local string = string
+local table = table
+
+local ipairs = ipairs
+
 require("luautils")
 require("TimedActions/ISTimedActionQueue")
 require("ISUI/ISInventoryPaneContextMenu")
@@ -11,9 +17,12 @@ local ISTimedActionQueue = ISTimedActionQueue
 local ISInventoryPaneContextMenu = ISInventoryPaneContextMenu
 local ISWorldObjectContextMenu = ISWorldObjectContextMenu
 
-local AQTranslations = require("ISUI/AQTranslations")
+local instanceof = instanceof
+local getSpecificPlayer = getSpecificPlayer
+
 local AQBrushTeeth = require("TimedActions/AQBrushTeeth")
 local AQConstants = require("AQConstants")
+local AQTranslations = require("AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -80,13 +89,19 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
             string.format("%s: %d / %d", AQTranslations.IGUI_AQBrushTeeth_Toothpaste,
                 math.min(toothpasteRemaining, toothpasteRequired), toothpasteRequired)
     end
-    tooltip.description = tooltip.description .. " <LINE> "
-    tooltip.description = tooltip.description ..
+    tooltip.description = tooltip.description .. " <LINE> " ..
         string.format("%s: %d / %d", AQTranslations.ContextMenu_WaterName,
             math.min(waterRemaining, waterRequired), waterRequired)
 
+    local unhappyLevel = playerObj:getBodyDamage():getUnhappynessLevel()
+    if unhappyLevel > 80 then
+        tooltip.description = tooltip.description .. " <LINE> <RGB:1,0,0> " ..
+            AQTranslations.ContextMenu_AQBrushTeeth_TooDepressed
+    end
+
     option.toolTip = tooltip
-    if waterRemaining < 1 then
+
+    if waterRemaining < 1 or unhappyLevel > 80 then
         option.notAvailable = true
     end
 end
