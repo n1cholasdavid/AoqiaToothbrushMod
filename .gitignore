@@ -1,3 +1,7 @@
+dist
+
+# Original Lua gitignore
+
 # Compiled Lua sources
 luac.out
 
