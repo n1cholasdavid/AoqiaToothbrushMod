@@ -1,5 +1,4 @@
 IG_UI_EN = {
-    IGUI_AQBrushTeeth_NeedToothpaste = "Need Toothpaste",
     IGUI_AQBrushTeeth_Toothpaste = "Toothpaste",
     IGUI_AQBrushTeeth_WithoutToothpaste = "Not Enough Toothpaste (Slower)",
 }
