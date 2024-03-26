@@ -8,7 +8,7 @@ local AQUtils = require("AQUtils")
 
 local AQTweaks = {}
 
-function AQTweaks.init()
+function AQTweaks.apply()
     local activated_mods = getActivatedMods()
     if activated_mods:contains("ItemTweakerAPI") then
         require("ItemTweaker_Core")
