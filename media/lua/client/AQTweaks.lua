@@ -9,18 +9,16 @@ local AQUtils = require("AQUtils")
 local AQTweaks = {}
 
 function AQTweaks.apply()
-    local ItemTweakerAPI = nil
-
     local activated_mods = getActivatedMods()
     if activated_mods:contains("ItemTweakerAPI") then
-        ItemTweakerAPI = require("ItemTweaker_Core")
+        require("ItemTweaker_Core")
     else
         AQUtils.logerror("Failed to find ItemTweakerAPI.")
         return
     end
 
     do
-        local TweakItem = ItemTweakerAPI.TweakItem
+        local TweakItem = TweakItem
         local tweaks = {
             ["Base.Toothbrush"] = {
                 ["DisplayCategory"] = "Household",
