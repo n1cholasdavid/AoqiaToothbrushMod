@@ -9,7 +9,7 @@ The idea was from "Madman's Toothpase Emporium" which hasn't been updated in qui
 
 ## Details
 
-- Brush your teeth to reduce unhappyness! Toothpaste speeds up this process by 2x.
+- Brush your teeth to reduce unhappyness (`-10` only twice a day)! Toothpaste speeds up this process by `2x`.
 - If you don't brush your teeth at least once a day, you will accumulate an unhappyness buff every day.
 
 ## TODO
