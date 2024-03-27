@@ -21,12 +21,12 @@ function AQTweaks.apply()
         local TweakItem = TweakItem
         local tweaks = {
             ["Base.Toothbrush"] = {
-                ["DisplayCategory"] = "Household",
+                ["DisplayCategory"] = "FirstAid",
                 ["Weight"] = "0.05",
                 ["Tooltip"] = "Tooltip_AQToothbrush",
             },
             ["Base.Toothpaste"] = {
-                ["DisplayCategory"] = "Household",
+                ["DisplayCategory"] = "FirstAid",
                 -- NOTE: As much as I'd like to do this, I cannot until I figure out how to handle item type change deleting it from world.
                 -- ["Type"] = "Drainable",
                 ["UseDelta"] = "0.05",
