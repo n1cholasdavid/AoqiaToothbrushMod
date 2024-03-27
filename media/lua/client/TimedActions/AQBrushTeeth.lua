@@ -5,8 +5,6 @@
 local ModData = ModData
 local ISTakeWaterAction = ISTakeWaterAction
 
-local sendVisual = sendVisual
-
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 
@@ -18,7 +16,7 @@ local AQUtils = require("AQUtils")
 local AQBrushTeeth = ISBaseTimedAction:derive("AQBrushTeeth")
 
 function AQBrushTeeth:isValid()
-    return self.sink:getObjectIndex() ~= -1
+    return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTypeRecurse("Toothbrush")
 end
 
 function AQBrushTeeth:update()
@@ -27,7 +25,8 @@ function AQBrushTeeth:update()
 end
 
 function AQBrushTeeth:waitToStart()
-    self.character:faceThisObject(self.sink)
+    -- Alt version makes character walk there I believe.
+    self.character:faceThisObjectAlt(self.sink)
     return self.character:shouldBeTurning()
 end
 
