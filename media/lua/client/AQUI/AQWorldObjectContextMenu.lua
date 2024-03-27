@@ -30,16 +30,22 @@ local AQWorldObjectContextMenu = {}
 
 ---@param player number
 ---@param waterObj IsoObject
+---@param toothbrush ComboItem
 ---@param toothpastes table<number, ComboItem>
-function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothpastes)
+function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpastes)
     local playerObj = getSpecificPlayer(player)
 
     if not waterObj:getSquare() or not luautils.walkAdj(playerObj, waterObj:getSquare(), true) then
         return
     end
 
+    local time = 600
+    if AQBrushTeeth.getRequiredToothpaste() > AQBrushTeeth.getToothpasteRemaining(toothpastes) then
+        time = time * 2
+    end
+
     ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpastes[1])
-    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothpastes))
+    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpastes, time))
 end
 
 ---@param waterObj IsoObject
@@ -53,7 +59,9 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     if instanceof(waterObj, "IsoClothingDryer") then return end
     if instanceof(waterObj, "IsoClothingWasher") then return end
     if instanceof(waterObj, "IsoCombinationWasherDryer") then return end
+
     if not playerInv:containsTypeRecurse("Toothbrush") then return end
+    local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush")
 
     local toothpasteList = {}
     local toothpastes = playerInv:getItemsFromType("Toothpaste")
@@ -65,7 +73,7 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     -- Context menu shtuff
 
     local option = context:addOption(AQTranslations.ContextMenu_AQBrushTeeth, waterObj,
-        AQWorldObjectContextMenu.onBrushTeeth, player, toothpasteList)
+        AQWorldObjectContextMenu.onBrushTeeth, player, toothbrush, toothpasteList)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
