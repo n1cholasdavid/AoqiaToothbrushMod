@@ -2,11 +2,15 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
+local ModData = ModData
+local ISTakeWaterAction = ISTakeWaterAction
+
+local sendVisual = sendVisual
+
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 
 local AQConstants = require("AQConstants")
-local AQModData = require("AQModData")
 local AQUtils = require("AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
@@ -14,7 +18,7 @@ local AQUtils = require("AQUtils")
 local AQBrushTeeth = ISBaseTimedAction:derive("AQBrushTeeth")
 
 function AQBrushTeeth:isValid()
-    return true
+    return self.sink:getObjectIndex() ~= -1
 end
 
 function AQBrushTeeth:update()
@@ -23,12 +27,14 @@ function AQBrushTeeth:update()
 end
 
 function AQBrushTeeth:waitToStart()
-    return false
+    self.character:faceThisObject(self.sink)
+    return self.character:shouldBeTurning()
 end
 
 function AQBrushTeeth:start()
-    self:setActionAnim("WashFace")
-    self:setOverrideHandModels(nil, nil)
+    --NOTE: Should eventually use custom animation. I am not sure how I would make the sound though.
+    self:setActionAnim("RipSheets")
+    self:setOverrideHandModels(self.toothbrush:getStaticModel(), nil)
     self.sound = self.character:playSound("WashYourself")
 end
 
@@ -45,8 +51,8 @@ end
 
 function AQBrushTeeth:perform()
     self:stopSound()
-    self.character:resetModelNextFrame()
-    sendVisual(self.character)
+
+    -- self.toothpastes[0]:Use()
     ISTakeWaterAction.SendTakeWaterCommand(self.character, self.sink, 1)
 
     -- Update player mod data
@@ -87,22 +93,22 @@ function AQBrushTeeth.getRequiredWater()
 end
 
 ---@param character IsoPlayer
-function AQBrushTeeth:new(character, sink, toothpastes)
+---@param sink IsoObject
+---@param toothbrush ComboItem
+---@param time number
+function AQBrushTeeth:new(character, sink, toothbrush, toothpastes, time)
     local o = {}
 
     setmetatable(o, self)
     self.__index       = self
     o.character        = character
     o.sink             = sink
+    o.toothbrush       = toothbrush
     o.toothpastes      = toothpastes
     o.stopOnWalk       = true
     o.stopOnRun        = true
     o.forceProgressBar = true
-    o.maxTime          = 600
-
-    if AQBrushTeeth.getRequiredToothpaste() > AQBrushTeeth.getToothpasteRemaining(toothpastes) then
-        o.maxTime = o.maxTime * 2
-    end
+    o.maxTime          = time
 
     if o.character:isTimedActionInstant() then
         o.maxTime = 1
