@@ -9,13 +9,10 @@ The idea was from "Madman's Toothpase Emporium" which hasn't been updated in qui
 
 ## Details
 
-- Brush your teeth to reduce unhappyness (`-10` only twice a day)! Toothpaste speeds up this process by `2x`.
-- If you don't brush your teeth at least once a day, you will accumulate an unhappyness buff every day.
+-   Needs at least a toothbrush to work! Toothpaste is optional and will double the speed of brushing.
+-   Brush your teeth to reduce unhappyness (`-10` only twice a day)! Toothpaste speeds up this process by `2x`.
+-   If you don't brush your teeth at least once a day, you will accumulate an unhappyness buff every day.
 
-## TODO
+## GitHub Projects
 
--   [ ] Bad teeth trait?
--   [ ] Fuagh moodle after a week of no brushing
--   [x] Unable to brush teeth when depressed?
--   [ ] Make toothpaste item a Drainable (big task I think)
--   [ ] Unhappyness due to not cleaning teeth also applies if you only brush teeth once (although it is less significant)
+-   Bug and Feature Tracker: https://github.com/users/aoqia194/projects/5
