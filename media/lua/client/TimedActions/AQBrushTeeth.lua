@@ -31,8 +31,7 @@ function AQBrushTeeth:waitToStart()
 end
 
 function AQBrushTeeth:start()
-    --NOTE: Should eventually use custom animation. I am not sure how I would make the sound though.
-    self:setActionAnim("RipSheets")
+    self:setActionAnim("BrushTeeth")
     self:setOverrideHandModels(self.toothbrush:getStaticModel(), nil)
     self.sound = self.character:playSound("WashYourself")
 end
