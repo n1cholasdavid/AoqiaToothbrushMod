@@ -1,4 +1,12 @@
+# Workshop distribution folder
 dist
+
+# Clip studio project file
+*.clip
+
+# Blender autosave file
+*.blend1
+
 *.code-workspace
 
 # ###### VSCode gitignore
