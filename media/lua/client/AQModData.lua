@@ -2,6 +2,8 @@
 --                                ModData stuff                               --
 -- -------------------------------------------------------------------------- --
 
+local AQConstants = require("AQConstants")
+
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQModData = {}
@@ -11,6 +13,7 @@ local AQModData = {}
 ---@field daysWithoutBrushingTeeth number | nil
 ---@field timesBrushedTeethToday number | nil
 AQModData.AQModDataStructDummy = {
+    _modId = AQConstants.MOD_ID,
     daysWithoutBrushingTeeth = 0,
     timesBrushedTeethToday = 0,
 }
