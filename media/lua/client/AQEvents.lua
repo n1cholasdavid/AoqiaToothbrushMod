@@ -36,7 +36,8 @@ function AQEvents.register()
                 ---@type AQModDataStruct
                 local data = ModData.get(AQConstants.MOD_ID)
                 if data.daysWithoutBrushingTeeth == nil
-                or data.timesBrushedTeethToday == nil then
+                or data.timesBrushedTeethToday == nil
+                or data._modId == nil then
                     ModData.add(AQConstants.MOD_ID, AQModData.AQModDataStructDummy)
                 end
             end
