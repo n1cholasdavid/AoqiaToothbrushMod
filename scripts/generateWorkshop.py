@@ -13,6 +13,9 @@ EXCLUDE_PATTERNS = [
     "TODO.md",
     "README.md",
     "CHANGELOG.md",
+    "*.clip",
+    "*.fbx",
+    "*.blend1",
 ]
 EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts"]
 
