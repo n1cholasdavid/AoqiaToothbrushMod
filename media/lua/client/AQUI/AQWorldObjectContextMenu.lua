@@ -31,8 +31,8 @@ local AQWorldObjectContextMenu = {}
 ---@param player number
 ---@param waterObj IsoObject
 ---@param toothbrush ComboItem
----@param toothpastes table<number, ComboItem>
-function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpastes)
+---@param toothpaste ComboItem
+function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpaste)
     local playerObj = getSpecificPlayer(player)
 
     if not waterObj:getSquare() or not luautils.walkAdj(playerObj, waterObj:getSquare(), true) then
@@ -40,12 +40,14 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
     end
 
     local time = 600
-    if AQBrushTeeth.getRequiredToothpaste() > AQBrushTeeth.getToothpasteRemaining(toothpastes) then
+    if AQBrushTeeth.getRequiredToothpaste() > AQBrushTeeth.getToothpasteRemaining(toothpaste) then
         time = time * 2
     end
 
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpastes[1])
-    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpastes, time))
+    local items = ISInventoryPane.getActualItems({ toothbrush, toothpaste })
+    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[1])
+    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[2])
+    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
 end
 
 ---@param waterObj IsoObject
@@ -63,22 +65,21 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     if not playerInv:containsTypeRecurse("Toothbrush") then return end
     local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush")
 
-    local toothpasteList = {}
-    local toothpastes = playerInv:getItemsFromType("Toothpaste")
-    for i = 0, toothpastes:size() - 1 do
-        local item = toothpastes:get(i)
-        table.insert(toothpasteList, item)
-    end
+    local toothpaste = playerInv:getItemFromTypeRecurse("Toothpaste")
+    -- for i = 0, toothpastes:size() - 1 do
+    --     local item = toothpastes:get(i)
+    --     table.insert(toothpaste, item)
+    -- end
 
     -- Context menu shtuff
 
-    local option = context:addOption(AQTranslations.ContextMenu_AQBrushTeeth, waterObj,
-        AQWorldObjectContextMenu.onBrushTeeth, player, toothbrush, toothpasteList)
+    local option = context:addOption(AQTranslations.ContextMenu_BrushTeeth, waterObj,
+        AQWorldObjectContextMenu.onBrushTeeth, player, toothbrush, toothpaste)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
     local waterRequired = AQBrushTeeth.getRequiredWater()
-    local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpasteList)
+    local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpaste)
     local toothpasteRequired = AQBrushTeeth.getRequiredToothpaste()
 
     -- local source = nil
@@ -91,10 +92,10 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     -- end
 
     if toothpasteRemaining < toothpasteRequired then
-        tooltip.description = tooltip.description .. AQTranslations.IGUI_AQBrushTeeth_WithoutToothpaste
+        tooltip.description = tooltip.description .. AQTranslations.IGUI_WithoutToothpaste
     else
         tooltip.description = tooltip.description ..
-            string.format("%s: %d / %d", AQTranslations.IGUI_AQBrushTeeth_Toothpaste,
+            string.format("%s: %d / %d", AQTranslations.IGUI_Toothpaste,
                 math.min(toothpasteRemaining, toothpasteRequired), toothpasteRequired)
     end
     tooltip.description = tooltip.description .. " <LINE> " ..
@@ -104,7 +105,7 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     local unhappyLevel = playerObj:getBodyDamage():getUnhappynessLevel()
     if unhappyLevel > 80 then
         tooltip.description = tooltip.description .. " <LINE> <RGB:1,0,0> " ..
-            AQTranslations.ContextMenu_AQBrushTeeth_TooDepressed
+            AQTranslations.ContextMenu_TooDepressed
     end
 
     option.toolTip = tooltip
