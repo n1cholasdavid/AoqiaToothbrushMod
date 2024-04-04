@@ -19,6 +19,26 @@ function AQBrushTeeth:isValid()
     return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTypeRecurse("Toothbrush")
 end
 
+-- ---@param event AnimEvent
+-- ---@param parameter any
+-- function AQBrushTeeth:animEvent(event, parameter)
+--     if event == "BrushTeethSwitch" then
+--         AQUtils.logdebug("switch event played")
+--         self:setActionAnim("BrushTeeth02")
+
+--         if self.sound then
+--             self.character:playSound("BrushTeeth02")
+--         end
+--     elseif event == "BrushTeethSwitch2" then
+--         AQUtils.logdebug("switch event 2 played")
+--         self:setActionAnim("BrushTeeth")
+
+--         if self.sound then
+--             self.character:playSound("BrushTeeth")
+--         end
+--     end
+-- end
+
 function AQBrushTeeth:update()
     self.character:faceThisObjectAlt(self.sink)
     self.character:setMetabolicTarget(Metabolics.LightDomestic)
@@ -32,8 +52,8 @@ end
 
 function AQBrushTeeth:start()
     self:setActionAnim("BrushTeeth")
-    self:setOverrideHandModels(self.toothbrush:getStaticModel(), nil)
-    self.sound = self.character:playSound("WashYourself")
+    self:setOverrideHandModels("Base.Toothbrush", nil)
+    self.sound = self.character:playSound("BrushTeeth")
 end
 
 function AQBrushTeeth:stopSound()
