@@ -4,26 +4,33 @@
 
 local getText = getText
 
+local AQConstants = require("AQConstants")
+
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQTranslations = {}
 
+-- Only really for autocomplete.
 -- Vanilla
-AQTranslations.ContextMenu_WaterName = "nil"
+AQTranslations.ContextMenu_WaterName = nil
 -- Modded
-AQTranslations.ContextMenu_AQBrushTeeth = "nil"
-AQTranslations.IGUI_AQBrushTeeth_WithoutToothpaste = "nil"
-AQTranslations.IGUI_AQBrushTeeth_Toothpaste = "nil"
+AQTranslations.ContextMenu_BrushTeeth = nil
+AQTranslations.ContextMenu_AlreadyBrushed = nil
+AQTranslations.ContextMenu_TooDepressed = nil
+AQTranslations.IGUI_WithoutToothpaste = nil
+AQTranslations.IGUI_Toothpaste = nil
+AQTranslations.Sandbox_Test = nil
 
 function AQTranslations.update()
     -- Vanilla
     AQTranslations.ContextMenu_WaterName = getText("ContextMenu_WaterName")
     -- Modded
-    AQTranslations.ContextMenu_AQBrushTeeth = getText("ContextMenu_AQBrushTeeth")
-    AQTranslations.ContextMenu_AQBrushTeeth_AlreadyBrushed = getText("ContextMenu_AQBrushTeeth_AlreadyBrushed")
-    AQTranslations.ContextMenu_AQBrushTeeth_TooDepressed = getText("ContextMenu_AQBrushTeeth_TooDepressed")
-    AQTranslations.IGUI_AQBrushTeeth_WithoutToothpaste = getText("IGUI_AQBrushTeeth_WithoutToothpaste")
-    AQTranslations.IGUI_AQBrushTeeth_Toothpaste = getText("IGUI_AQBrushTeeth_Toothpaste")
+    AQTranslations.ContextMenu_BrushTeeth = getText("ContextMenu_" .. AQConstants.MOD_ID .. "_BrushTeeth")
+    AQTranslations.ContextMenu_AlreadyBrushed = getText("ContextMenu_" .. AQConstants.MOD_ID .. "_AlreadyBrushed")
+    AQTranslations.ContextMenu_TooDepressed = getText("ContextMenu_" .. AQConstants.MOD_ID .. "_TooDepressed")
+    AQTranslations.IGUI_WithoutToothpaste = getText("IGUI_" .. AQConstants.MOD_ID .. "_WithoutToothpaste")
+    AQTranslations.IGUI_Toothpaste = getText("IGUI_" .. AQConstants.MOD_ID .. "_Toothpaste")
+    AQTranslations.Sandbox_Test = getText("Sandbox_" .. AQConstants.MOD_ID .. "_Test")
 end
 
 return AQTranslations
