@@ -1,5 +1,5 @@
 ContextMenu_EN = {
-	ContextMenu_AQBrushTeeth = "Brush Teeth",
-	ContextMenu_AQBrushTeeth_AlreadyBrushed = "You have already brushed your teeth twice today.",
-	ContextMenu_AQBrushTeeth_TooDepressed = "You are too depressed to maintain your hygiene.",
+	ContextMenu_AoqiaToothbrushMod_BrushTeeth = "Brush Teeth",
+	ContextMenu_AoqiaToothbrushMod_AlreadyBrushed = "You have already brushed your teeth twice today.",
+	ContextMenu_AoqiaToothbrushMod_TooDepressed = "You are too depressed to maintain your hygiene.",
 }
