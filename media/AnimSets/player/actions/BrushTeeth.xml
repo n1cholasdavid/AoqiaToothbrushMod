@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animNode>
 	<m_Name>BrushTeeth</m_Name>
-	<m_SpeedScale>1.00</m_SpeedScale>
+	<m_SpeedScale>1.75</m_SpeedScale>
 	<m_AnimName>BrushTeeth</m_AnimName>
 	<m_Looped>true</m_Looped>
 
