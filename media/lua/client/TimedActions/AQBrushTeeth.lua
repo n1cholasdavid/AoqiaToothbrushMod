@@ -2,8 +2,9 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
-local ModData = ModData
 local ISTakeWaterAction = ISTakeWaterAction
+local ModData = ModData
+local SandboxVars = SandboxVars
 
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
@@ -91,23 +92,33 @@ end
 
 function AQBrushTeeth.getRequiredToothpaste()
     -- NOTE: Maybe have the toothpaste amount be dynamic based on how dirty your teeth are?
-    return 1
-end
-
----@param toothpastes table<number, ComboItem>
-function AQBrushTeeth.getToothpasteRemaining(toothpastes)
-    local total = 0
-
-    for _, toothpaste in ipairs(toothpastes) do
-        total = total + toothpaste:getUses()
+    local requiredToothpaste = SandboxVars[AQConstants.MOD_ID].BrushTeethRequiredToothpaste
+    if requiredToothpaste == nil then
+        return 1
     end
 
-    return total
+    return requiredToothpaste
 end
 
+-- ---@param toothpastes table<number, ComboItem>
+-- function AQBrushTeeth.getToothpasteRemaining(toothpastes)
+--     local total = 0
+
+--     for _, toothpaste in ipairs(toothpastes) do
+--         total = total + toothpaste:getUses()
+--     end
+
+--     return total
+-- end
+
+---@return number
 function AQBrushTeeth.getRequiredWater()
-    -- NOTE: See getRequiredToothpaste()
-    return 1
+    local requiredWater = SandboxVars[AQConstants.MOD_ID].BrushTeethRequiredWater
+    if requiredWater == nil then
+        return 1
+    end
+
+    return requiredWater
 end
 
 ---@param character IsoPlayer
