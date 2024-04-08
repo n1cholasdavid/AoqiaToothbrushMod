@@ -2,16 +2,21 @@
 --            Handles event stuff like registering listeners/hooks.           --
 -- -------------------------------------------------------------------------- --
 
+local math                     = math
+
+local pairs                    = pairs
+
 local Events                   = Events
 local ModData                  = ModData
+local SandboxVars              = SandboxVars
 
 local getPlayer                = getPlayer
 
 local AQWorldObjectContextMenu = require("AQUI/AQWorldObjectContextMenu")
 local AQConstants              = require("AQConstants")
-local AQModData                = require("AQModData")
 local AQTranslations           = require("AQTranslations")
 local AQTweaks                 = require("AQTweaks")
+local AQUtils                  = require("AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -46,10 +51,25 @@ function AQEvents.register()
             else
                 ---@type AQModDataStruct
                 local data = ModData.get(AQConstants.MOD_ID)
-                if data.daysWithoutBrushingTeeth == nil
-                or data.timesBrushedTeethToday == nil
-                or data._modVersion == nil then
+                if     data.daysWithoutBrushingTeeth == nil
+                or     data.timesBrushedTeethToday == nil
+                or     data._modVersion == nil then
                     ModData.add(AQConstants.MOD_ID, AQModDataStructDummy)
+                elseif data._modVersion ~= AQConstants.MOD_VERSION then
+                    AQUtils.logdebug("Mod data version mismatch. Expected version=" ..
+                        AQConstants.MOD_VERSION ..
+                        " but got version=" ..
+                        data._modVersion ..
+                        "\nMerging old mod data with dummy mod data.")
+
+                    local dummy = AQModDataStructDummy
+                    -- NOTE: This is only a shallow copy!!! Any nested tables will NOT be merged.
+                    for k, v in pairs(data) do
+                        if k ~= "_modVersion" then
+                            dummy[k] = v
+                        end
+                    end
+                    ModData.add(AQConstants.MOD_ID, dummy)
                 end
             end
         end
@@ -74,9 +94,45 @@ function AQEvents.register()
             data.timesBrushedTeethToday = 0
         end
 
-        if data.daysWithoutBrushingTeeth > 0 then
-            local bd = getPlayer():getBodyDamage()
-            bd:setUnhappynessLevel(bd:getUnhappynessLevel() + 5)
+        local doDailyEffect = SandboxVars[AQConstants.MOD_ID].DoDailyEffect
+        if data.daysWithoutBrushingTeeth > 0 and doDailyEffect then
+            local player = getPlayer()
+            local stats = player:getStats()
+            local bd = player:getBodyDamage()
+
+            ---@type number
+            local gracePeriod = SandboxVars[AQConstants.MOD_ID].DailyEffectGracePeriod
+            ---@type number
+            local unhappyRate = SandboxVars[AQConstants.MOD_ID].DailyEffectExponent
+            ---@type number
+            local stressRate = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateExponent
+            ---@type number
+            local unhappyMax = SandboxVars[AQConstants.MOD_ID].DailyEffectMaxValue
+            ---@type number
+            local stressMax = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateMaxValue
+
+            -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/g4kaux58kl
+            local unhappyFormula = AQUtils.clamp(
+                math.exp(unhappyRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
+                0,
+                unhappyMax)
+            local stressFormula = AQUtils.clamp(
+                math.exp(stressRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
+                0,
+                stressMax)
+
+            ---@type number
+            local effectType = SandboxVars[AQConstants.MOD_ID].DailyEffectType
+            if effectType == 1 then
+                bd:setUnhappynessLevel(bd:getUnhappynessLevel() + unhappyFormula)
+            elseif effectType == 2 then
+                bd:setUnhappynessLevel(bd:getUnhappynessLevel() + unhappyFormula)
+                stats:setStress(stats:getStress() + stressFormula)
+            elseif effectType == 3 then
+                stats:setStress(stats:getStress() + stressFormula)
+            else
+                AQUtils.logerror("Invalid DailyEffectType enum value")
+            end
         end
     end)
 end
