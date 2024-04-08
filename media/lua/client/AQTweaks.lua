@@ -23,16 +23,16 @@ function AQTweaks.apply()
             ["Base.Toothbrush"] = {
                 ["DisplayCategory"] = "FirstAid",
                 ["Weight"] = "0.05",
-                ["Tooltip"] = "Tooltip_AQToothbrush",
+                ["Tooltip"] = "Tooltip_AoqiaToothbrushMod_Toothbrush",
             },
             ["Base.Toothpaste"] = {
                 ["DisplayCategory"] = "FirstAid",
-                -- NOTE: As much as I'd like to do this, I cannot until I figure out how to handle item type change deleting it from world.
+                -- TODO: As much as I'd like to do this, I cannot until I figure out how to handle item type change deleting it from world.
                 -- ["Type"] = "Drainable",
                 ["UseDelta"] = "0.05",
                 ["UseWhileEquipped"] = "FALSE",
                 ["cantBeConsolidated"] = "TRUE",
-                ["Tooltip"] = "Tooltip_AQToothpaste",
+                ["Tooltip"] = "Tooltip_AoqiaToothbrushMod_Toothpaste",
             }
         }
 
