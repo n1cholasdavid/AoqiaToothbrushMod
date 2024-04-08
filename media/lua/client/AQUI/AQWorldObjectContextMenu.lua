@@ -4,7 +4,6 @@
 
 local math = math
 local string = string
-local table = table
 
 local ipairs = ipairs
 
@@ -13,9 +12,11 @@ require("TimedActions/ISTimedActionQueue")
 require("ISUI/ISInventoryPaneContextMenu")
 require("ISUI/ISWorldObjectContextMenu")
 local luautils = luautils
-local ISTimedActionQueue = ISTimedActionQueue
+local ISInventoryPane = ISInventoryPane
 local ISInventoryPaneContextMenu = ISInventoryPaneContextMenu
+local ISTimedActionQueue = ISTimedActionQueue
 local ISWorldObjectContextMenu = ISWorldObjectContextMenu
+local SandboxVars = SandboxVars
 
 local instanceof = instanceof
 local getSpecificPlayer = getSpecificPlayer
@@ -40,13 +41,15 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
     end
 
     local time = 600
-    if AQBrushTeeth.getRequiredToothpaste() > AQBrushTeeth.getToothpasteRemaining(toothpaste) then
+    if AQBrushTeeth.getRequiredToothpaste() > 1 --[[ AQBrushTeeth.getToothpasteRemaining(toothpaste) ]] then
         time = time * 2
     end
 
-    local items = ISInventoryPane.getActualItems({ toothbrush, toothpaste })
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[1])
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[2])
+    if SandboxVars[AQConstants.MOD_ID].TransferItemsOnUse then
+        local items = ISInventoryPane.getActualItems({ toothbrush, toothpaste })
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[1])
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[2])
+    end
     ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
 end
 
@@ -79,7 +82,8 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
 
     local waterRemaining = waterObj:getWaterAmount()
     local waterRequired = AQBrushTeeth.getRequiredWater()
-    local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpaste)
+    -- local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpaste)
+    local toothpasteRemaining = 1 -- AQBrushTeeth.getToothpasteRemaining(toothpaste)
     local toothpasteRequired = AQBrushTeeth.getRequiredToothpaste()
 
     -- local source = nil
@@ -94,6 +98,7 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     if toothpasteRemaining < toothpasteRequired then
         tooltip.description = tooltip.description .. AQTranslations.IGUI_WithoutToothpaste
     else
+        -- FIXME: Potentially unnecessary math.min check because of the if statement above.
         tooltip.description = tooltip.description ..
             string.format("%s: %d / %d", AQTranslations.IGUI_Toothpaste,
                 math.min(toothpasteRemaining, toothpasteRequired), toothpasteRequired)
@@ -109,7 +114,6 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     end
 
     option.toolTip = tooltip
-
     if waterRemaining < 1 or unhappyLevel > 80 then
         option.notAvailable = true
     end
