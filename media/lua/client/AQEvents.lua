@@ -2,16 +2,21 @@
 --            Handles event stuff like registering listeners/hooks.           --
 -- -------------------------------------------------------------------------- --
 
+-- STD Lua Global Tables/Variables
 local math                     = math
 
+-- STD Lua Global Functions
 local pairs                    = pairs
 
+-- Vanilla Global Tables/Variables
 local Events                   = Events
 local ModData                  = ModData
 local SandboxVars              = SandboxVars
 
+-- Vanilla Global Functions
 local getPlayer                = getPlayer
 
+-- My Mod Modules
 local AQWorldObjectContextMenu = require("AQUI/AQWorldObjectContextMenu")
 local AQConstants              = require("AQConstants")
 local AQTranslations           = require("AQTranslations")
@@ -22,7 +27,6 @@ local AQUtils                  = require("AQUtils")
 
 local AQEvents                 = {}
 
--- Only used for type-checking purposes in ModData.
 ---@class AQModDataStruct
 ---@field _modVersion string | nil
 ---@field daysWithoutBrushingTeeth number | nil
