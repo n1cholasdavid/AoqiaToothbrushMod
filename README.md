@@ -13,6 +13,9 @@ The idea was from "Madman's Toothpase Emporium" which hasn't been updated in qui
 -   Brush your teeth to reduce unhappyness (`-10` only twice a day)! Toothpaste speeds up this process by `2x`.
 -   If you don't brush your teeth at least once a day, you will accumulate an unhappyness buff every day.
 
+To visualise the daily effect formula, I have created simple desmos graph: https://www.desmos.com/calculator/g4kaux58kl
+If you intend to change the exponent value in the Sandbox Options, you should change it in the graph first so you can see how it affects the game.
+
 ## GitHub Projects
 
 -   Bug and Feature Tracker: https://github.com/users/aoqia194/projects/5
