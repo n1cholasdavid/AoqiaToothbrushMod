@@ -40,7 +40,7 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
         return
     end
 
-    local time = 600
+    local time = SandboxVars[AQConstants.MOD_ID].BrushTeethTime
     if AQBrushTeeth.getRequiredToothpaste() > 1 --[[ AQBrushTeeth.getToothpasteRemaining(toothpaste) ]] then
         time = time * 2
     end
