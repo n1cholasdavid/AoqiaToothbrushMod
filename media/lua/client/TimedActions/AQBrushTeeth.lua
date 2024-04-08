@@ -97,7 +97,7 @@ function AQBrushTeeth:perform()
         -- ---@type number
         -- local stressMax = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateMaxValue
 
-        -- -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/g4kaux58kl
+        -- -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/cw1zeuxxff
         -- local unhappyFormula = AQUtils.clamp(
         --     math.exp(unhappyRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
         --     0,
