@@ -2,12 +2,11 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
+require("TimedActions/ISBaseTimedAction")
+local ISBaseTimedAction = ISBaseTimedAction
 local ISTakeWaterAction = ISTakeWaterAction
 local ModData = ModData
 local SandboxVars = SandboxVars
-
-require("TimedActions/ISBaseTimedAction")
-local ISBaseTimedAction = ISBaseTimedAction
 
 local AQConstants = require("AQConstants")
 local AQUtils = require("AQUtils")
@@ -81,10 +80,57 @@ function AQBrushTeeth:perform()
     data.daysWithoutBrushingTeeth = 0
     data.timesBrushedTeethToday = data.timesBrushedTeethToday + 1
 
-    if data.timesBrushedTeethToday <= 2 then
-        -- Decrease the unhappy
-        local bodyDamage = self.character:getBodyDamage()
-        bodyDamage:setUnhappynessLevel(AQUtils.clamp(bodyDamage:getUnhappynessLevel() - 10, 0, 100))
+    ---@type number
+    local doEffect = SandboxVars[AQConstants.MOD_ID].DoBrushTeethEffect
+    ---@type number
+    local maxValue = SandboxVars[AQConstants.MOD_ID].BrushTeethMaxValue
+
+    if doEffect and data.timesBrushedTeethToday <= maxValue then
+        -- ---@type number
+        -- local gracePeriod = SandboxVars[AQConstants.MOD_ID].DailyEffectGracePeriod
+        -- ---@type number
+        -- local unhappyRate = SandboxVars[AQConstants.MOD_ID].DailyEffectExponent
+        -- ---@type number
+        -- local stressRate = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateExponent
+        -- ---@type number
+        -- local unhappyMax = SandboxVars[AQConstants.MOD_ID].DailyEffectMaxValue
+        -- ---@type number
+        -- local stressMax = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateMaxValue
+
+        -- -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/g4kaux58kl
+        -- local unhappyFormula = AQUtils.clamp(
+        --     math.exp(unhappyRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
+        --     0,
+        --     unhappyMax)
+        -- local stressFormula = AQUtils.clamp(
+        --     math.exp(stressRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
+        --     0,
+        --     stressMax)
+
+        ---@type number
+        local effectType = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectType
+        ---@type number
+        local unhappyAmount = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectAmount
+        ---@type number
+        local stressAmount = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectAlternateAmount
+
+        ---@type Stats
+        local stats = self.character:getStats()
+        ---@type BodyDamage
+        local bd = self.character:getBodyDamage()
+        local unhappiness = bd:getUnhappynessLevel()
+        local stress = stats:getStress()
+
+        if effectType == 1 then
+            bd:setUnhappynessLevel(unhappiness - unhappyAmount)
+        elseif effectType == 2 then
+            bd:setUnhappynessLevel(unhappiness - unhappyAmount)
+            stats:setStress(stress - stressAmount)
+        elseif effectType == 3 then
+            stats:setStress(stress - stressAmount)
+        else
+            AQUtils.logerror("Invalid BrushTeethEffectType enum value")
+        end
     end
 
     ISBaseTimedAction.perform(self)
