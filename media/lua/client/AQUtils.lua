@@ -11,26 +11,29 @@ local AQUtils = {}
 ---@param msg string
 function AQUtils.logdebug(msg)
     if AQConstants.IS_DEBUG then
-        print("[" .. AQConstants.MOD_ID .. "] " .. msg)
+        print("[" .. AQConstants.MOD_ID .. "]: " .. msg)
     end
 end
 
 ---@param msg string
 function AQUtils.logerror(msg)
-    error("[" .. AQConstants.MOD_ID .. "] " .. msg, 1)
+    error("[" .. AQConstants.MOD_ID .. "]: " .. msg, 1)
 end
 
----@param num number
+---@param value number
 ---@param min number
 ---@param max number
-function AQUtils.clamp(num, min, max)
-    if num < min then
-        num = min
-    elseif num > max then
-        num = max
+-- This function is basically just `min(max(value, min), max)`.
+function AQUtils.clamp(value, min, max)
+    local result = value
+
+    if value < min then
+        result = min
+    elseif value > max then
+        result = max
     end
 
-    return num
+    return result
 end
 
 return AQUtils
