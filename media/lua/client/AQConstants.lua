@@ -6,7 +6,7 @@
 
 local AQConstants = {}
 
-AQConstants.IS_DEBUG = getDebug()
+AQConstants.IS_DEBUG = getDebug() == true
 AQConstants.IS_LAST_STAND = getCore():getGameMode() == "LastStand"
 
 AQConstants.MOD_ID = "AoqiaToothbrushMod"
