@@ -2,28 +2,20 @@
 --                 Registers tweaks using the ItemTweakerAPI.                 --
 -- -------------------------------------------------------------------------- --
 
-local AQUtils = require("AQUtils")
+local AQTranslations = require("AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQTweaks = {}
 
 function AQTweaks.apply()
-    local activated_mods = getActivatedMods()
-    if activated_mods:contains("ItemTweakerAPI") then
-        require("ItemTweaker_Core")
-    else
-        AQUtils.logerror("Failed to find ItemTweakerAPI.")
-        return
-    end
-
     do
         local TweakItem = TweakItem
         local tweaks = {
             ["Base.Toothbrush"] = {
                 ["DisplayCategory"] = "FirstAid",
                 ["Weight"] = "0.05",
-                ["Tooltip"] = "Tooltip_AoqiaToothbrushMod_Toothbrush",
+                ["Tooltip"] = AQTranslations.Tooltip_Toothbrush,
             },
             ["Base.Toothpaste"] = {
                 ["DisplayCategory"] = "FirstAid",
@@ -32,7 +24,7 @@ function AQTweaks.apply()
                 ["UseDelta"] = "0.05",
                 ["UseWhileEquipped"] = "FALSE",
                 ["cantBeConsolidated"] = "TRUE",
-                ["Tooltip"] = "Tooltip_AoqiaToothbrushMod_Toothpaste",
+                ["Tooltip"] = AQTranslations.Tooltip_Toothpaste,
             }
         }
 
