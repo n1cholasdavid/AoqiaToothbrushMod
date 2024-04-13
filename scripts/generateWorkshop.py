@@ -16,6 +16,9 @@ EXCLUDE_PATTERNS = [
     "*.clip",
     "*.fbx",
     "*.blend1",
+    "ItemTweaker_Core.lua",
+    "MF_ISMoodle.lua",
+    "MF_MoodleScale.lua",
 ]
 EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts"]
 
