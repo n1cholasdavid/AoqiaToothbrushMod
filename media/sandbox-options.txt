@@ -141,3 +141,22 @@ option AoqiaToothbrushMod.BrushTeethRequiredToothpaste
     page = AoqiaToothbrushMod,
     translation = AoqiaToothbrushMod_BrushTeethRequiredToothpaste,
 }
+
+option AoqiaToothbrushMod.GoodTraitCount
+{
+    type = integer,
+    default = 10,
+    min = 1,
+    max = 100,
+    page = AoqiaToothbrushMod,
+    translation = AoqiaToothbrushMod_GoodTraitCount,
+}
+option AoqiaToothbrushMod.BadTraitCount
+{
+    type = integer,
+    default = 7,
+    min = 1,
+    max = 100,
+    page = AoqiaToothbrushMod,
+    translation = AoqiaToothbrushMod_BadTraitCount,
+}
