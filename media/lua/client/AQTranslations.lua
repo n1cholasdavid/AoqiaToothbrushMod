@@ -20,6 +20,8 @@ AQTranslations.ContextMenu_TooDepressed = nil
 AQTranslations.IGUI_WithoutToothpaste = nil
 AQTranslations.IGUI_Toothpaste = nil
 AQTranslations.Sandbox_Test = nil
+AQTranslations.Tooltip_Toothbrush = nil
+AQTranslations.Tooltip_Toothpaste = nil
 
 function AQTranslations.update()
     -- Vanilla
@@ -31,6 +33,12 @@ function AQTranslations.update()
     AQTranslations.IGUI_WithoutToothpaste = getText("IGUI_" .. AQConstants.MOD_ID .. "_WithoutToothpaste")
     AQTranslations.IGUI_Toothpaste = getText("IGUI_" .. AQConstants.MOD_ID .. "_Toothpaste")
     AQTranslations.Sandbox_Test = getText("Sandbox_" .. AQConstants.MOD_ID .. "_Test")
+    AQTranslations.Tooltip_Toothbrush = getText("Tooltip_" .. AQConstants.MOD_ID .. "_Toothbrush")
+    AQTranslations.Tooltip_Toothpaste = getText("Tooltip_" .. AQConstants.MOD_ID .. "_Toothpaste")
+    AQTranslations.UI_GoldenBrusherTrait = getText("UI_" .. AQConstants.MOD_ID .. "_GoldenBrusherTrait")
+    AQTranslations.UI_GoldenBrusherTraitDesc = getText("UI_" .. AQConstants.MOD_ID .. "_GoldenBrusherTraitDesc")
+    AQTranslations.UI_FoulBrusherTrait = getText("UI_" .. AQConstants.MOD_ID .. "_FoulBrusherTrait")
+    AQTranslations.UI_FoulBrusherTraitDesc = getText("UI_" .. AQConstants.MOD_ID .. "_FoulBrusherTraitDesc")
 end
 
 return AQTranslations
