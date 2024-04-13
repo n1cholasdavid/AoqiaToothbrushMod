@@ -5,7 +5,6 @@
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 local ISTakeWaterAction = ISTakeWaterAction
-local ModData = ModData
 local SandboxVars = SandboxVars
 
 local AQConstants = require("AQConstants")
@@ -14,6 +13,15 @@ local AQUtils = require("AQUtils")
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQBrushTeeth = ISBaseTimedAction:derive("AQBrushTeeth")
+
+---@type IsoPlayer
+AQBrushTeeth.character = nil
+---@type IsoObject
+AQBrushTeeth.sink = nil
+---@type ComboItem
+AQBrushTeeth.toothbrush = nil
+---@type number
+AQBrushTeeth.time = nil
 
 function AQBrushTeeth:isValid()
     return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTypeRecurse("Toothbrush")
@@ -69,44 +77,32 @@ end
 
 function AQBrushTeeth:perform()
     self:stopSound()
-
+    -- TODO: Uncomment this when toothpaste drainable item is handled.
     -- self.toothpastes[0]:Use()
     ISTakeWaterAction.SendTakeWaterCommand(self.character, self.sink, 1)
 
-    -- Update player mod data
+    ---@type AQPlayerModDataStruct
+    local data = self.character:getModData()[AQConstants.MOD_ID]
 
-    ---@type AQModDataStruct
-    local data = ModData.get(AQConstants.MOD_ID)
-    data.daysWithoutBrushingTeeth = 0
-    data.timesBrushedTeethToday = data.timesBrushedTeethToday + 1
+    -- Brush teeth mod data update
+    data.statTeethDirt = 0
+    data.todayBrushCount = data.todayBrushCount + 1
+    data.totalBrushCount = data.totalBrushCount + 1
+    data.totalDaysNotBrushed = 0
 
-    ---@type number
-    local doEffect = SandboxVars[AQConstants.MOD_ID].DoBrushTeethEffect
-    ---@type number
-    local maxValue = SandboxVars[AQConstants.MOD_ID].BrushTeethMaxValue
+    ---@type AQSandboxVarsStruct
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
 
-    if doEffect and data.timesBrushedTeethToday <= maxValue then
-        -- ---@type number
-        -- local gracePeriod = SandboxVars[AQConstants.MOD_ID].DailyEffectGracePeriod
-        -- ---@type number
-        -- local unhappyRate = SandboxVars[AQConstants.MOD_ID].DailyEffectExponent
-        -- ---@type number
-        -- local stressRate = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateExponent
-        -- ---@type number
-        -- local unhappyMax = SandboxVars[AQConstants.MOD_ID].DailyEffectMaxValue
-        -- ---@type number
-        -- local stressMax = SandboxVars[AQConstants.MOD_ID].DailyEffectAlternateMaxValue
+    -- newMax is maxValue influenced by current trait
+    local newMax = sandboxVars.BrushTeethMaxValue
+    if self.character:HasTrait("GoldenBrusher") then
+        newMax = newMax / 2
+    elseif self.character:HasTrait("FoulBrusher") then
+        newMax = newMax * 2
+    end
 
-        -- -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/cw1zeuxxff
-        -- local unhappyFormula = AQUtils.clamp(
-        --     math.exp(unhappyRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
-        --     0,
-        --     unhappyMax)
-        -- local stressFormula = AQUtils.clamp(
-        --     math.exp(stressRate * (data.daysWithoutBrushingTeeth - gracePeriod)),
-        --     0,
-        --     stressMax)
-
+    -- Brush Teeth Effect
+    if sandboxVars.DoBrushTeethEffect and data.todayBrushCount <= newMax then
         ---@type number
         local effectType = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectType
         ---@type number
