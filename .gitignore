@@ -1,6 +1,11 @@
 # Workshop distribution folder
 dist
 
+# Workshop Dependencies
+media/lua/client/ItemTweaker_Core.lua
+media/lua/client/MF_ISMoodle.lua
+media/lua/client/MF_MoodleScale.lua
+
 # Clip studio project file
 *.clip
 
