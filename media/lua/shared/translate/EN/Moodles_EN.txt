@@ -1,0 +1,10 @@
+Moodles_EN = {
+    Moodles_DirtyTeeth_Bad_lvl1 = "Slightly Dirty",
+    Moodles_DirtyTeeth_Bad_desc_lvl1 = "I'm here to remind you!",
+    Moodles_DirtyTeeth_Bad_lvl2 = "Dirty",
+    Moodles_DirtyTeeth_Bad_desc_lvl2 = "Could do with a bit of brushing.",
+    Moodles_DirtyTeeth_Bad_lvl3 = "Very Dirty",
+    Moodles_DirtyTeeth_Bad_desc_lvl3 = "Your teeth are starting to get yellow.",
+    Moodles_DirtyTeeth_Bad_lvl4 = "Extremely Dirty",
+    Moodles_DirtyTeeth_Bad_desc_lvl4 = "'ello matey I is from the United Kingdom innit",
+}
