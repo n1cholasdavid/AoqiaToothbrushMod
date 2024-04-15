@@ -2,10 +2,15 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
+local math = math
+
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 local ISTakeWaterAction = ISTakeWaterAction
 local SandboxVars = SandboxVars
+
+require("MF_ISMoodle")
+local MoodleFactory = MF
 
 local AQConstants = require("AQConstants")
 local AQUtils = require("AQUtils")
@@ -85,12 +90,12 @@ function AQBrushTeeth:perform()
     local data = self.character:getModData()[AQConstants.MOD_ID]
 
     -- Brush teeth mod data update
-    data.statTeethDirt = 0
     data.todayBrushCount = data.todayBrushCount + 1
     data.totalBrushCount = data.totalBrushCount + 1
     data.totalDaysNotBrushed = 0
 
     ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
 
     -- newMax is maxValue influenced by current trait
@@ -101,14 +106,22 @@ function AQBrushTeeth:perform()
         newMax = newMax * 2
     end
 
+    if data.todayBrushCount <= newMax then
+        data.statTeethDirt = 0.5
+    else
+        -- NOTE: 2 brushes above max feels weird. Should use some algorithm based on newMax
+        data.statTeethDirt = AQUtils.clamp(data.statTeethDirt + ((1.0 - data.statTeethDirt) / (newMax * 2)), 0.0, 1.0)
+    end
+
+    -- Update moodle
+    local moodle = MoodleFactory.getMoodle("DirtyTeeth", getPlayer():getPlayerNum())
+    moodle:setValue(data.statTeethDirt)
+
     -- Brush Teeth Effect
     if sandboxVars.DoBrushTeethEffect and data.todayBrushCount <= newMax then
-        ---@type number
-        local effectType = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectType
-        ---@type number
-        local unhappyAmount = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectAmount
-        ---@type number
-        local stressAmount = SandboxVars[AQConstants.MOD_ID].BrushTeethEffectAlternateAmount
+        local effectType = sandboxVars.BrushTeethEffectType
+        local unhappyAmount = sandboxVars.BrushTeethEffectAmount
+        local stressAmount = sandboxVars.BrushTeethEffectAlternateAmount
 
         ---@type Stats
         local stats = self.character:getStats()
@@ -133,8 +146,12 @@ function AQBrushTeeth:perform()
 end
 
 function AQBrushTeeth.getRequiredToothpaste()
+    ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+
     -- NOTE: Maybe have the toothpaste amount be dynamic based on how dirty your teeth are?
-    local requiredToothpaste = SandboxVars[AQConstants.MOD_ID].BrushTeethRequiredToothpaste
+    local requiredToothpaste = sandboxVars.BrushTeethRequiredToothpaste
     if requiredToothpaste == nil then
         return 1
     end
@@ -155,7 +172,11 @@ end
 
 ---@return number
 function AQBrushTeeth.getRequiredWater()
-    local requiredWater = SandboxVars[AQConstants.MOD_ID].BrushTeethRequiredWater
+    ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+
+    local requiredWater = sandboxVars.BrushTeethRequiredWater
     if requiredWater == nil then
         return 1
     end
