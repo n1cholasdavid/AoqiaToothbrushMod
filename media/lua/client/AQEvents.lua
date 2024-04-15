@@ -38,7 +38,7 @@ local AQEvents                   = {}
 ---@field _modVersion string | nil Tracks what version of the mod belongs to the mod data.
 ---@field daysBrushedCount number | nil Tracks the number of days CONSECUTIVELY the player has brushed their teeth at least once.
 ---@field daysBrushedAboveMax number | nil Tracks how many times player CONSECUTIVELY brushed teeth >= sandbox Max Value for n days.
----@field statTeethDirt number | nil Tracks how dirty the player's teeth are from 50 to 100. 0 is ultra clean, 50 is normal, 100 is ultra dirty.
+---@field statTeethDirt number | nil Tracks how dirty the player's teeth are from 0 to 100. 0 is dirty, 0.5 is normal, 100 is clean.
 ---@field todayBrushCount number | nil Tracks how many times player brushed teeth today.
 ---@field totalBrushCount number | nil Tracks how many times player brushed teeth total.
 ---@field totalDaysNotBrushed number | nil Tracks how many CONSECUTIVE times player didn't brush teeth total.
@@ -46,7 +46,7 @@ local AQPlayerModDataStructDummy = {
     _modVersion = AQConstants.MOD_VERSION,
     daysBrushedCount = 0,
     daysBrushedAboveMax = 0,
-    statTeethDirt = 50,
+    statTeethDirt = 0.5,
     todayBrushCount = 0,
     totalBrushCount = 0,
     totalDaysNotBrushed = 0,
@@ -74,25 +74,25 @@ local AQSandboxVarsStructDummy   = {
     DoTransferItemsOnUse = true,
     -- Daily Effect
     DoDailyEffect = true,
-    DailyEffectType = 0,
-    DailyEffectExponent = 0.06,
-    DailyEffectAlternateExponent = 0.06,
-    DailyEffectMaxValue = 0,
-    DailyEffectAlternateMaxValue = 0,
-    DailyEffectGracePeriod = 0,
+    DailyEffectType = 1,
+    DailyEffectExponent = 0.12,
+    DailyEffectAlternateExponent = 0.12,
+    DailyEffectMaxValue = 25,
+    DailyEffectAlternateMaxValue = 25,
+    DailyEffectGracePeriod = 2,
     -- Brush Teeth Effect
     DoBrushTeethEffect = true,
-    BrushTeethEffectType = 0,
-    BrushTeethEffectAmount = 0,
-    BrushTeethEffectAlternateAmount = 0,
+    BrushTeethEffectType = 1,
+    BrushTeethEffectAmount = 10,
+    BrushTeethEffectAlternateAmount = 10,
     -- Brush Teeth Vars
     BrushTeethTime = 600,
-    BrushTeethMaxValue = 0,
+    BrushTeethMaxValue = 2,
     BrushTeethRequiredWater = 1,
     BrushTeethRequiredToothpaste = 1,
     -- Trait Vars
-    GoodTraitCount = 0,
-    BadTraitCount = 0,
+    GoodTraitCount = 10,
+    BadTraitCount = 7,
 }
 
 function AQEvents.OnGameBoot()
@@ -116,6 +116,9 @@ end
 ---@param playerNum number The player number of the newly-spawned character.
 ---@param player IsoPlayer The new player object.
 function AQEvents.OnCreatePlayer(playerNum, player)
+    -- Maybe do modData[AQConstants.MOD_ID] = AQPlayerModDataStructDummy?
+    -- local modData = player:getModData()
+
     ---@type AQPlayerModDataStruct
     local data = player:getModData()[AQConstants.MOD_ID]
 
@@ -123,7 +126,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     -- Has the user enabled the mod on an existing character?
     local newChar = (data == nil or data._modVersion == nil)
     if newChar then
-        data = AQPlayerModDataStructDummy
+        player:getModData()[AQConstants.MOD_ID] = AQPlayerModDataStructDummy
         return
     end
 
@@ -131,7 +134,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     for k, _ in pairs(AQPlayerModDataStructDummy) do
         for _, _ in pairs(data) do
             if data[k] == nil then
-                data = AQPlayerModDataStructDummy
+                player:getModData()[AQConstants.MOD_ID] = AQPlayerModDataStructDummy
                 return
             end
         end
@@ -151,7 +154,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
             end
         end
 
-        data = dummy
+        player:getModData()[AQConstants.MOD_ID] = dummy
     end
 end
 
@@ -159,12 +162,9 @@ end
 function AQEvents.OnPlayerDeath(deadPlayer)
     local player = getPlayer()
 
-    ---@type AQPlayerModDataStruct
-    local data = player:getModData()[AQConstants.MOD_ID]
-
     -- Reset the mod data of the player if they died.
     if deadPlayer == player then
-        data = AQPlayerModDataStructDummy
+        player:getModData()[AQConstants.MOD_ID] = AQPlayerModDataStructDummy
     end
 end
 
@@ -175,9 +175,10 @@ function AQEvents.EveryTenMinutes()
     ---@type AQPlayerModDataStruct
     local data = player:getModData()[AQConstants.MOD_ID]
 
-    -- NOTE: The value reaches 100 from 0 LINEARLY after a week (in minutes).
-    local formula = (100 / 10080) * 10
-    data.statTeethDirt = AQUtils.clamp(data.statTeethDirt + formula, 0, 100)
+    -- Linear decay formula so that statTeethDirt reaches 0 (from 1) after a week.
+    -- maxValue / (durationMins / everyXMinutes)
+    local formula = 1.0 / (10080 / 10)
+    data.statTeethDirt = AQUtils.clamp(data.statTeethDirt - formula, 0, 100)
 
     local moodle = MoodleFactory.getMoodle("DirtyTeeth", playerNum)
     moodle:setValue(data.statTeethDirt)
@@ -206,6 +207,7 @@ function AQEvents.EveryDays()
     -- Trait logic is calculated daily because it closely relies on the amount of days not brushed.
 
     ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
     if not sandboxVars or sandboxVars.DoTransferItemsOnUse == nil then
         AQUtils.logerror("No sandbox variables found. " ..
