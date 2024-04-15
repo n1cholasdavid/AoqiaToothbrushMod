@@ -33,15 +33,6 @@ option AoqiaToothbrushMod.DailyEffectExponent
     page = AoqiaToothbrushMod,
     translation = AoqiaToothbrushMod_DailyEffectExponent,
 }
-option AoqiaToothbrushMod.DailyEffectMaxValue
-{
-    type = integer,
-    default = 25,
-    min = 0,
-    max = 100,
-    page = AoqiaToothbrushMod,
-    translation = AoqiaToothbrushMod_DailyEffectMaxValue,
-}
 option AoqiaToothbrushMod.DailyEffectAlternateExponent
 {
     type = double,
@@ -50,6 +41,15 @@ option AoqiaToothbrushMod.DailyEffectAlternateExponent
     max = 1.00,
     page = AoqiaToothbrushMod,
     translation = AoqiaToothbrushMod_DailyEffectAlternateExponent,
+}
+option AoqiaToothbrushMod.DailyEffectMaxValue
+{
+    type = integer,
+    default = 25,
+    min = 0,
+    max = 100,
+    page = AoqiaToothbrushMod,
+    translation = AoqiaToothbrushMod_DailyEffectMaxValue,
 }
 option AoqiaToothbrushMod.DailyEffectAlternateMaxValue
 {
