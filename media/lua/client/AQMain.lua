@@ -16,4 +16,5 @@ if not activated_mods:contains("ItemTweakerAPI") or not activated_mods:contains(
 end
 
 AQEvents.register()
+
 AQUtils.logdebug("Up and running!")
