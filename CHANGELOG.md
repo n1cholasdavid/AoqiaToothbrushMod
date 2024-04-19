@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Stuff
+-   Teeth brushing animation
+-   Positive and Negative trait
+-   MoodleFramework dependency
+-   Teeth brush status moodle
+-   Multiple sandbox options (with docs and calculator on GitHub)
+-   More translations
+-   Lots of code (changelog only lists front-end noticable features)
 
 ### Changed
 
--   Stuff
+-   Use GlobalModData instead of PlayerModData (supports cleanup of old GlobalModData).
+-   Fixed bug where items didn't transfer to the main inventory.
 
 ### Removed
 
