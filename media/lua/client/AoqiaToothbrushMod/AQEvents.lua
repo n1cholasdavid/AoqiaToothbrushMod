@@ -20,13 +20,13 @@ require("MF_ISMoodle")
 local MoodleFactory              = MF
 
 -- My Mod Modules
-local AQWorldObjectContextMenu   = require("AQUI/AQWorldObjectContextMenu")
-local AQConstants                = require("AQConstants")
-local AQMoodles                  = require("AQMoodles")
-local AQTraits                   = require("AQTraits")
-local AQTranslations             = require("AQTranslations")
-local AQTweaks                   = require("AQTweaks")
-local AQUtils                    = require("AQUtils")
+local AQWorldObjectContextMenu   = require("AoqiaToothbrushMod/AQUI/AQWorldObjectContextMenu")
+local AQConstants                = require("AoqiaToothbrushMod/AQConstants")
+local AQMoodles                  = require("AoqiaToothbrushMod/AQMoodles")
+local AQTraits                   = require("AoqiaToothbrushMod/AQTraits")
+local AQTranslations             = require("AoqiaToothbrushMod/AQTranslations")
+local AQTweaks                   = require("AoqiaToothbrushMod/AQTweaks")
+local AQUtils                    = require("AoqiaToothbrushMod/AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -37,19 +37,17 @@ local AQEvents                   = {}
 ---@class AQPlayerModDataStruct
 ---@field _modVersion string | nil Tracks what version of the mod belongs to the mod data.
 ---@field daysBrushedCount number | nil Tracks the number of days CONSECUTIVELY the player has brushed their teeth at least once.
----@field daysBrushedAboveMax number | nil Tracks how many times player CONSECUTIVELY brushed teeth >= sandbox Max Value for n days.
----@field statTeethDirt number | nil Tracks how dirty the player's teeth are from 0 to 100. 0 is dirty, 0.5 is normal, 100 is clean.
+---@field daysBrushedToMax number | nil Tracks how many times player CONSECUTIVELY brushed teeth >= sandbox Max Value for n days.
 ---@field todayBrushCount number | nil Tracks how many times player brushed teeth today.
 ---@field totalBrushCount number | nil Tracks how many times player brushed teeth total.
----@field totalDaysNotBrushed number | nil Tracks how many CONSECUTIVE times player didn't brush teeth total.
+---@field daysNotBrushed number | nil Tracks how many CONSECUTIVE times player didn't brush teeth total.
 local AQPlayerModDataStructDummy = {
     _modVersion = AQConstants.MOD_VERSION,
     daysBrushedCount = 0,
-    daysBrushedAboveMax = 0,
-    statTeethDirt = 0.5,
+    daysBrushedToMax = 0,
     todayBrushCount = 0,
     totalBrushCount = 0,
-    totalDaysNotBrushed = 0,
+    daysNotBrushed = 0,
 }
 ---@class AQSandboxVarsStruct
 ---@field DoTransferItemsOnUse boolean | nil
@@ -168,22 +166,6 @@ function AQEvents.OnPlayerDeath(deadPlayer)
     end
 end
 
-function AQEvents.EveryTenMinutes()
-    local player = getPlayer()
-    local playerNum = player:getPlayerNum()
-
-    ---@type AQPlayerModDataStruct
-    local data = player:getModData()[AQConstants.MOD_ID]
-
-    -- Linear decay formula so that statTeethDirt reaches 0 (from 1) after a week.
-    -- maxValue / (durationMins / everyXMinutes)
-    local formula = 1.0 / (10080 / 10)
-    data.statTeethDirt = AQUtils.clamp(data.statTeethDirt - formula, 0, 100)
-
-    local moodle = MoodleFactory.getMoodle("DirtyTeeth", playerNum)
-    moodle:setValue(data.statTeethDirt)
-end
-
 function AQEvents.EveryDays()
     local player = getPlayer()
     local traits = player:getTraits()
@@ -195,12 +177,12 @@ function AQEvents.EveryDays()
 
     -- Daily mod data update logic
     if data.todayBrushCount == 0 then
-        data.totalDaysNotBrushed = data.totalDaysNotBrushed + 1
-        data.daysBrushedAboveMax = 0
+        data.daysNotBrushed = data.daysNotBrushed + 1
+        data.daysBrushedToMax = 0
         data.daysBrushedCount = 0
     else
         data.daysBrushedCount = data.daysBrushedCount + 1
-        data.totalDaysNotBrushed = 0
+        data.daysNotBrushed = 0
     end
 
     -- Trait stuff is below.
@@ -216,9 +198,9 @@ function AQEvents.EveryDays()
     end
 
     -- Assign trait depending on mod data
-    if data.totalDaysNotBrushed > sandboxVars.BadTraitCount then
+    if data.daysNotBrushed >= sandboxVars.BadTraitCount then
         traits:add("FoulBrusher")
-    elseif data.daysBrushedCount >= sandboxVars.GoodTraitCount then
+    elseif data.daysBrushedToMax >= sandboxVars.GoodTraitCount then
         traits:add("GoldenBrusher")
     end
 
@@ -233,7 +215,7 @@ function AQEvents.EveryDays()
     -- Using trait logic to update mod data
     if data.todayBrushCount ~= 0 then
         if data.todayBrushCount >= newMax then
-            data.daysBrushedAboveMax = data.daysBrushedAboveMax + 1
+            data.daysBrushedToMax = data.daysBrushedToMax + 1
         end
 
         data.todayBrushCount = 0
@@ -241,7 +223,7 @@ function AQEvents.EveryDays()
 
     -- Is the daily effect active?
     local doDailyEffect = sandboxVars.DoDailyEffect
-    if data.totalDaysNotBrushed <= 0 or doDailyEffect == false then
+    if data.daysNotBrushed <= 0 or doDailyEffect == false then
         return
     end
 
@@ -253,13 +235,13 @@ function AQEvents.EveryDays()
 
     -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/awdp9rmxs8
     local unhappyFormula = AQUtils.clamp(math.exp(
-            unhappyRate * (data.totalDaysNotBrushed - gracePeriod) /
-            (tonumber(data.totalDaysNotBrushed >= (newMax / 2)) + 1)),
+            unhappyRate * (data.daysNotBrushed - gracePeriod) /
+            (AQUtils.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
         0,
         unhappyMax)
     local stressFormula = AQUtils.clamp(math.exp(
-            stressRate * (data.totalDaysNotBrushed - gracePeriod) /
-            (tonumber(data.totalDaysNotBrushed >= (newMax / 2)) + 1)),
+            stressRate * (data.daysNotBrushed - gracePeriod) /
+            (AQUtils.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
         0,
         stressMax)
 
@@ -283,7 +265,6 @@ function AQEvents.register()
     Events.OnCreatePlayer.Add(AQEvents.OnCreatePlayer)
     Events.OnPlayerDeath.Add(AQEvents.OnPlayerDeath)
     Events.OnFillWorldObjectContextMenu.Add(AQWorldObjectContextMenu.createMenu)
-    Events.EveryTenMinutes.Add(AQEvents.EveryTenMinutes)
     Events.EveryDays.Add(AQEvents.EveryDays)
 end
 

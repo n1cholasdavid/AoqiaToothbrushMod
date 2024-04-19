@@ -4,8 +4,8 @@
 
 local getActivatedMods = getActivatedMods
 
-local AQEvents = require("AQEvents")
-local AQUtils = require("AQUtils")
+local AQEvents = require("AoqiaToothbrushMod/AQEvents")
+local AQUtils = require("AoqiaToothbrushMod/AQUtils")
 
 -- ------------------------------- Entrypoint ------------------------------- --
 

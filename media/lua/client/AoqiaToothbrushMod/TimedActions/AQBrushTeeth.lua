@@ -12,8 +12,8 @@ local SandboxVars = SandboxVars
 require("MF_ISMoodle")
 local MoodleFactory = MF
 
-local AQConstants = require("AQConstants")
-local AQUtils = require("AQUtils")
+local AQConstants = require("AoqiaToothbrushMod/AQConstants")
+local AQUtils = require("AoqiaToothbrushMod/AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -92,7 +92,7 @@ function AQBrushTeeth:perform()
     -- Brush teeth mod data update
     data.todayBrushCount = data.todayBrushCount + 1
     data.totalBrushCount = data.totalBrushCount + 1
-    data.totalDaysNotBrushed = 0
+    data.daysNotBrushed = 0
 
     ---@type AQSandboxVarsStruct
     ---@diagnostic disable-next-line: assign-type-mismatch
@@ -109,12 +109,14 @@ function AQBrushTeeth:perform()
     if data.todayBrushCount <= newMax then
         data.statTeethDirt = 0.5
     else
+        local formula = ((1.0 - data.statTeethDirt) / (newMax * 2))
         -- NOTE: 2 brushes above max feels weird. Should use some algorithm based on newMax
-        data.statTeethDirt = AQUtils.clamp(data.statTeethDirt + ((1.0 - data.statTeethDirt) / (newMax * 2)), 0.0, 1.0)
+        data.statTeethDirt = AQUtils.clamp(data.statTeethDirt + formula, 0.0, 1.0)
     end
 
     -- Update moodle
     local moodle = MoodleFactory.getMoodle("DirtyTeeth", getPlayer():getPlayerNum())
+    -- FIXME: Don't use statTeethDirt. Make moodle work on a day-to-day basis to represent the todayBrushCount.
     moodle:setValue(data.statTeethDirt)
 
     -- Brush Teeth Effect

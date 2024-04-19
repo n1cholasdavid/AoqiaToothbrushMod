@@ -2,7 +2,7 @@
 --                 Registers tweaks using the ItemTweakerAPI.                 --
 -- -------------------------------------------------------------------------- --
 
-local AQTranslations = require("AQTranslations")
+local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 

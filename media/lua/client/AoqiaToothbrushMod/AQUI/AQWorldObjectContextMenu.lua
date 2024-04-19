@@ -22,8 +22,8 @@ local instanceof = instanceof
 local getSpecificPlayer = getSpecificPlayer
 
 local AQBrushTeeth = require("TimedActions/AQBrushTeeth")
-local AQConstants = require("AQConstants")
-local AQTranslations = require("AQTranslations")
+local AQConstants = require("AoqiaToothbrushMod/AQConstants")
+local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 

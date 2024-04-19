@@ -4,7 +4,7 @@
 
 local getText = getText
 
-local AQConstants = require("AQConstants")
+local AQConstants = require("AoqiaToothbrushMod/AQConstants")
 
 -- ------------------------------ Module Start ------------------------------ --
 

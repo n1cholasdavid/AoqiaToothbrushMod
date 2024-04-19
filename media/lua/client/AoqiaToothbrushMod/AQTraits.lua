@@ -4,7 +4,7 @@
 
 local TraitFactory = TraitFactory
 
-local AQTranslations = require("AQTranslations")
+local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 
