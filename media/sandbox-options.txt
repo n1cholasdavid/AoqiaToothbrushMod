@@ -109,7 +109,7 @@ option AoqiaToothbrushMod.BrushTeethTime
 {
     type = integer,
     default = 600,
-    min = 0,
+    min = 1,
     max = 10000,
     page = AoqiaToothbrushMod,
     translation = AoqiaToothbrushMod_BrushTeethTime,
@@ -118,7 +118,7 @@ option AoqiaToothbrushMod.BrushTeethMaxValue
 {
     type = integer,
     default = 2,
-    min = 0,
+    min = 1,
     max = 100,
     page = AoqiaToothbrushMod,
     translation = AoqiaToothbrushMod_BrushTeethMaxValue,
