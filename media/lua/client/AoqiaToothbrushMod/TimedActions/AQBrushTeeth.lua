@@ -13,6 +13,7 @@ require("MF_ISMoodle")
 local MoodleFactory = MF
 
 local AQConstants = require("AoqiaToothbrushMod/AQConstants")
+local AQMoodles = require("AoqiaToothbrushMod/AQMoodles")
 local AQUtils = require("AoqiaToothbrushMod/AQUtils")
 
 -- ------------------------------ Module Start ------------------------------ --
@@ -93,31 +94,18 @@ function AQBrushTeeth:perform()
     data.todayBrushCount = data.todayBrushCount + 1
     data.totalBrushCount = data.totalBrushCount + 1
     data.daysNotBrushed = 0
+    data.timeLastBrushTenMins = 0
 
     ---@type AQSandboxVarsStruct
     ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
 
-    -- newMax is maxValue influenced by current trait
-    local newMax = sandboxVars.BrushTeethMaxValue
-    if self.character:HasTrait("GoldenBrusher") then
-        newMax = newMax / 2
-    elseif self.character:HasTrait("FoulBrusher") then
-        newMax = newMax * 2
-    end
-
-    if data.todayBrushCount <= newMax then
-        data.statTeethDirt = 0.5
-    else
-        local formula = ((1.0 - data.statTeethDirt) / (newMax * 2))
-        -- NOTE: 2 brushes above max feels weird. Should use some algorithm based on newMax
-        data.statTeethDirt = AQUtils.clamp(data.statTeethDirt + formula, 0.0, 1.0)
-    end
+    local newMax = AQMoodles.calcMaxValue(sandboxVars, self.character)
+    data.brushTeethNewMaxValue = newMax
 
     -- Update moodle
-    local moodle = MoodleFactory.getMoodle("DirtyTeeth", getPlayer():getPlayerNum())
-    -- FIXME: Don't use statTeethDirt. Make moodle work on a day-to-day basis to represent the todayBrushCount.
-    moodle:setValue(data.statTeethDirt)
+    local moodle = MoodleFactory.getMoodle("DirtyTeeth", self.character:getPlayerNum())
+    moodle:setValue(AQUtils.clamp(data.todayBrushCount, 0, newMax) / newMax)
 
     -- Brush Teeth Effect
     if sandboxVars.DoBrushTeethEffect and data.todayBrushCount <= newMax then
@@ -147,12 +135,12 @@ function AQBrushTeeth:perform()
     ISBaseTimedAction.perform(self)
 end
 
+---@return number
 function AQBrushTeeth.getRequiredToothpaste()
     ---@type AQSandboxVarsStruct
     ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
-
-    -- NOTE: Maybe have the toothpaste amount be dynamic based on how dirty your teeth are?
+ 
     local requiredToothpaste = sandboxVars.BrushTeethRequiredToothpaste
     if requiredToothpaste == nil then
         return 1
