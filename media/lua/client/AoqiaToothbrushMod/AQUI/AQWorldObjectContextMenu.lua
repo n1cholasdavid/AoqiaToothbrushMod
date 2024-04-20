@@ -109,8 +109,8 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
     end
     option.toolTip = tooltip
 
-    local minBrushTime = ((1440 / 10) / 2) / data.brushTeethNewMaxValue
-    if waterRemaining < 1 or unhappyLevel > 80 or (data.timeLastBrushTenMins < minBrushTime and data.timeLastBrushTenMins < 999999) then
+    local minBrushTime = (1440 / 10) / data.brushTeethNewMaxValue
+    if waterRemaining < 1 or unhappyLevel > 80 or (data.timeLastBrushTenMins < minBrushTime and data.todayBrushCount ~= 0) then
         option.notAvailable = true
     end
 end
