@@ -11,13 +11,13 @@ local AQUtils = {}
 ---@param msg string
 function AQUtils.logdebug(msg)
     if AQConstants.IS_DEBUG then
-        print("[" .. AQConstants.MOD_ID .. "]: " .. msg)
+        print("[" .. AQConstants.MOD_ID .. "] " .. msg)
     end
 end
 
 ---@param msg string
 function AQUtils.logerror(msg)
-    error("[" .. AQConstants.MOD_ID .. "]: " .. msg, 1)
+    error("[" .. AQConstants.MOD_ID .. "] " .. msg, 1)
 end
 
 ---@param value number
