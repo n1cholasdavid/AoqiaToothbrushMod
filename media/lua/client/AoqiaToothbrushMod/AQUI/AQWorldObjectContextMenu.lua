@@ -21,7 +21,7 @@ local SandboxVars = SandboxVars
 local instanceof = instanceof
 local getSpecificPlayer = getSpecificPlayer
 
-local AQBrushTeeth = require("TimedActions/AQBrushTeeth")
+local AQBrushTeeth = require("AoqiaToothbrushMod/TimedActions/AQBrushTeeth")
 local AQConstants = require("AoqiaToothbrushMod/AQConstants")
 local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
@@ -54,36 +54,32 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
 end
 
 ---@param waterObj IsoObject
----@param player number
+---@param playerNum number
 ---@param context ISContextMenu
-function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
-    local playerObj = getSpecificPlayer(player)
-    local playerInv = playerObj:getInventory()
+function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
+    local player = getSpecificPlayer(playerNum)
+    local playerInv = player:getInventory()
 
-    if waterObj:getSquare():getBuilding() ~= playerObj:getBuilding() then return end
+    ---@type AQPlayerModDataStruct
+    local data = player:getModData()[AQConstants.MOD_ID]
+
+    if waterObj:getSquare():getBuilding() ~= player:getBuilding() then return end
     if instanceof(waterObj, "IsoClothingDryer") then return end
     if instanceof(waterObj, "IsoClothingWasher") then return end
     if instanceof(waterObj, "IsoCombinationWasherDryer") then return end
 
     if not playerInv:containsTypeRecurse("Toothbrush") then return end
     local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush")
-
-    local toothpaste = playerInv:getItemFromTypeRecurse("Toothpaste")
-    -- for i = 0, toothpastes:size() - 1 do
-    --     local item = toothpastes:get(i)
-    --     table.insert(toothpaste, item)
-    -- end
+    local toothpastes = playerInv:getItemsFromType("Toothpaste")
 
     -- Context menu shtuff
-
     local option = context:addOption(AQTranslations.ContextMenu_BrushTeeth, waterObj,
-        AQWorldObjectContextMenu.onBrushTeeth, player, toothbrush, toothpaste)
+        AQWorldObjectContextMenu.onBrushTeeth, playerNum, toothbrush, toothpastes)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
     local waterRequired = AQBrushTeeth.getRequiredWater()
-    -- local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpaste)
-    local toothpasteRemaining = 1 -- AQBrushTeeth.getToothpasteRemaining(toothpaste)
+    local toothpasteRemaining = toothpastes:size()
     local toothpasteRequired = AQBrushTeeth.getRequiredToothpaste()
 
     -- local source = nil
@@ -98,23 +94,23 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     if toothpasteRemaining < toothpasteRequired then
         tooltip.description = tooltip.description .. AQTranslations.IGUI_WithoutToothpaste
     else
-        -- FIXME: Potentially unnecessary math.min check because of the if statement above.
         tooltip.description = tooltip.description ..
             string.format("%s: %d / %d", AQTranslations.IGUI_Toothpaste,
-                math.min(toothpasteRemaining, toothpasteRequired), toothpasteRequired)
+                toothpasteRequired, toothpasteRequired)
     end
     tooltip.description = tooltip.description .. " <LINE> " ..
         string.format("%s: %d / %d", AQTranslations.ContextMenu_WaterName,
             math.min(waterRemaining, waterRequired), waterRequired)
 
-    local unhappyLevel = playerObj:getBodyDamage():getUnhappynessLevel()
+    local unhappyLevel = player:getBodyDamage():getUnhappynessLevel()
     if unhappyLevel > 80 then
         tooltip.description = tooltip.description .. " <LINE> <RGB:1,0,0> " ..
             AQTranslations.ContextMenu_TooDepressed
     end
-
     option.toolTip = tooltip
-    if waterRemaining < 1 or unhappyLevel > 80 then
+
+    local minBrushTime = ((1440 / 10) / 2) / data.brushTeethNewMaxValue
+    if waterRemaining < 1 or unhappyLevel > 80 or (data.timeLastBrushTenMins < minBrushTime and data.timeLastBrushTenMins < 999999) then
         option.notAvailable = true
     end
 end
