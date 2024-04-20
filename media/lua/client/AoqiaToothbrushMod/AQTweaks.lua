@@ -23,7 +23,7 @@ function AQTweaks.apply()
                 -- ["Type"] = "Drainable",
                 ["UseDelta"] = "0.05",
                 ["UseWhileEquipped"] = "FALSE",
-                ["cantBeConsolidated"] = "TRUE",
+                ["cantBeConsolided"] = "TRUE",
                 ["Tooltip"] = AQTranslations.Tooltip_Toothpaste,
             }
         }
