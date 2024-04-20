@@ -2,7 +2,7 @@
 --                   Has utility functions used by the mod.                   --
 -- -------------------------------------------------------------------------- --
 
-local AQConstants = require("AQConstants")
+local AQConstants = require("AoqiaToothbrushMod/AQConstants")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -20,17 +20,32 @@ function AQUtils.logerror(msg)
     error("[" .. AQConstants.MOD_ID .. "] " .. msg, 1)
 end
 
----@param num number
+---@param value number
 ---@param min number
 ---@param max number
-function AQUtils.clamp(num, min, max)
-    if num < min then
-        num = min
-    elseif num > max then
-        num = max
+-- This function is basically just `min(max(value, min), max)`.
+function AQUtils.clamp(value, min, max)
+    local result = value
+
+    if value < min then
+        result = min
+    elseif value > max then
+        result = max
     end
 
-    return num
+    return result
+end
+
+---@param value number
+--- This function converts numbers to boolean values.
+function AQUtils.toboolean(value)
+    return value == 1 and true or value == 0 and false
+end
+
+---@param value boolean
+--- This function converts boolean values to numbers.
+function AQUtils.tonumber(value)
+    return value == true and 1 or value == false and 0
 end
 
 return AQUtils

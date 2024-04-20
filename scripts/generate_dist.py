@@ -1,3 +1,5 @@
+""" This is not a module. """
+
 import fnmatch
 import os
 import shutil
@@ -6,15 +8,25 @@ SRC = "../"
 DEST = "../dist/"
 
 EXCLUDE_PATTERNS = [
+    # Itself
     "*.py",
+    # VSCode related files
     "*.code-workspace",
-    ".gitignore",
     ".luarc.json",
+    # Github repo files
+    ".gitignore",
     "TODO.md",
     "README.md",
     "CHANGELOG.md",
+    "SANDBOX_OPTIONS.md",
+    # Blender files
+    "*.blend1",
+    # Lua workshop libs
+    "ItemTweaker_Core.lua",
+    "MF_ISMoodle.lua",
+    "MF_MoodleScale.lua",
 ]
-EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts"]
+EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts", "blender"]
 
 print("Generating workshop files...")
 

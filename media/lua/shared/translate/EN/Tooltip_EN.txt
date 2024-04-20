@@ -1,6 +1,6 @@
 Tooltip_EN = {
     -- Toothbrush
-    Tooltip_AQToothbrush = "Can be used to brush your teeth.",
+    Tooltip_AoqiaToothbrushMod_Toothbrush = "Can be used to brush your teeth.",
     -- Toothpaste
-    Tooltip_AQToothpaste = "Can be used with a toothbrush to brush your teeth.",
+    Tooltip_AoqiaToothbrushMod_Toothpaste = "Can be used with a toothbrush to brush your teeth.",
 }

@@ -1,6 +1,35 @@
+# Workshop distribution folder
 dist
 
-# Original Lua gitignore
+# Workshop Dependencies
+media/lua/client/AoqiaToothbrushMod/ItemTweaker_Core.lua
+media/lua/client/AoqiaToothbrushMod/MF_ISMoodle.lua
+media/lua/client/AoqiaToothbrushMod/MF_MoodleScale.lua
+
+# Clip studio project file
+*.clip
+
+# Blender autosave file
+*.blend1
+
+*.code-workspace
+
+# ###### VSCode gitignore
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# ###### Original Lua gitignore
 
 # Compiled Lua sources
 luac.out

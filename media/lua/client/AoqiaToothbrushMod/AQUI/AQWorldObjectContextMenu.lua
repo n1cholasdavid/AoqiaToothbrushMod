@@ -4,7 +4,6 @@
 
 local math = math
 local string = string
-local table = table
 
 local ipairs = ipairs
 
@@ -13,16 +12,18 @@ require("TimedActions/ISTimedActionQueue")
 require("ISUI/ISInventoryPaneContextMenu")
 require("ISUI/ISWorldObjectContextMenu")
 local luautils = luautils
-local ISTimedActionQueue = ISTimedActionQueue
+local ISInventoryPane = ISInventoryPane
 local ISInventoryPaneContextMenu = ISInventoryPaneContextMenu
+local ISTimedActionQueue = ISTimedActionQueue
 local ISWorldObjectContextMenu = ISWorldObjectContextMenu
+local SandboxVars = SandboxVars
 
 local instanceof = instanceof
 local getSpecificPlayer = getSpecificPlayer
 
-local AQBrushTeeth = require("TimedActions/AQBrushTeeth")
-local AQConstants = require("AQConstants")
-local AQTranslations = require("AQTranslations")
+local AQBrushTeeth = require("AoqiaToothbrushMod/TimedActions/AQBrushTeeth")
+local AQConstants = require("AoqiaToothbrushMod/AQConstants")
+local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -30,47 +31,55 @@ local AQWorldObjectContextMenu = {}
 
 ---@param player number
 ---@param waterObj IsoObject
----@param toothpastes table<number, ComboItem>
-function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothpastes)
+---@param toothbrush ComboItem
+---@param toothpaste ComboItem
+function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpaste)
     local playerObj = getSpecificPlayer(player)
 
     if not waterObj:getSquare() or not luautils.walkAdj(playerObj, waterObj:getSquare(), true) then
         return
     end
 
-    ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpastes[1])
-    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothpastes))
+    local time = SandboxVars[AQConstants.MOD_ID].BrushTeethTime
+    if AQBrushTeeth.getRequiredToothpaste() > 1 --[[ AQBrushTeeth.getToothpasteRemaining(toothpaste) ]] then
+        time = time * 2
+    end
+
+    if SandboxVars[AQConstants.MOD_ID].TransferItemsOnUse then
+        local items = ISInventoryPane.getActualItems({ toothbrush, toothpaste })
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[1])
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[2])
+    end
+    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
 end
 
 ---@param waterObj IsoObject
----@param player number
+---@param playerNum number
 ---@param context ISContextMenu
-function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
-    local playerObj = getSpecificPlayer(player)
-    local playerInv = playerObj:getInventory()
+function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
+    local player = getSpecificPlayer(playerNum)
+    local playerInv = player:getInventory()
 
-    if waterObj:getSquare():getBuilding() ~= playerObj:getBuilding() then return end
+    ---@type AQPlayerModDataStruct
+    local data = player:getModData()[AQConstants.MOD_ID]
+
+    if waterObj:getSquare():getBuilding() ~= player:getBuilding() then return end
     if instanceof(waterObj, "IsoClothingDryer") then return end
     if instanceof(waterObj, "IsoClothingWasher") then return end
     if instanceof(waterObj, "IsoCombinationWasherDryer") then return end
-    if not playerInv:containsTypeRecurse("Toothbrush") then return end
 
-    local toothpasteList = {}
+    if not playerInv:containsTypeRecurse("Toothbrush") then return end
+    local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush")
     local toothpastes = playerInv:getItemsFromType("Toothpaste")
-    for i = 0, toothpastes:size() - 1 do
-        local item = toothpastes:get(i)
-        table.insert(toothpasteList, item)
-    end
 
     -- Context menu shtuff
-
-    local option = context:addOption(AQTranslations.ContextMenu_AQBrushTeeth, waterObj,
-        AQWorldObjectContextMenu.onBrushTeeth, player, toothpasteList)
+    local option = context:addOption(AQTranslations.ContextMenu_BrushTeeth, waterObj,
+        AQWorldObjectContextMenu.onBrushTeeth, playerNum, toothbrush, toothpastes)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
     local waterRequired = AQBrushTeeth.getRequiredWater()
-    local toothpasteRemaining = AQBrushTeeth.getToothpasteRemaining(toothpasteList)
+    local toothpasteRemaining = toothpastes:size()
     local toothpasteRequired = AQBrushTeeth.getRequiredToothpaste()
 
     -- local source = nil
@@ -83,25 +92,25 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
     -- end
 
     if toothpasteRemaining < toothpasteRequired then
-        tooltip.description = tooltip.description .. AQTranslations.IGUI_AQBrushTeeth_WithoutToothpaste
+        tooltip.description = tooltip.description .. AQTranslations.IGUI_WithoutToothpaste
     else
         tooltip.description = tooltip.description ..
-            string.format("%s: %d / %d", AQTranslations.IGUI_AQBrushTeeth_Toothpaste,
-                math.min(toothpasteRemaining, toothpasteRequired), toothpasteRequired)
+            string.format("%s: %d / %d", AQTranslations.IGUI_Toothpaste,
+                toothpasteRequired, toothpasteRequired)
     end
     tooltip.description = tooltip.description .. " <LINE> " ..
         string.format("%s: %d / %d", AQTranslations.ContextMenu_WaterName,
             math.min(waterRemaining, waterRequired), waterRequired)
 
-    local unhappyLevel = playerObj:getBodyDamage():getUnhappynessLevel()
+    local unhappyLevel = player:getBodyDamage():getUnhappynessLevel()
     if unhappyLevel > 80 then
         tooltip.description = tooltip.description .. " <LINE> <RGB:1,0,0> " ..
-            AQTranslations.ContextMenu_AQBrushTeeth_TooDepressed
+            AQTranslations.ContextMenu_TooDepressed
     end
-
     option.toolTip = tooltip
 
-    if waterRemaining < 1 or unhappyLevel > 80 then
+    local minBrushTime = (1440 / 10) / data.brushTeethNewMaxValue
+    if waterRemaining < 1 or unhappyLevel > 80 or (data.timeLastBrushTenMins < minBrushTime and data.todayBrushCount ~= 0) then
         option.notAvailable = true
     end
 end
