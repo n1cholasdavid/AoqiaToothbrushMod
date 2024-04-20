@@ -21,10 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Use GlobalModData instead of PlayerModData (supports cleanup of old GlobalModData).
 -   Fixed bug where items didn't transfer to the main inventory.
+-   Fixed potential lua file name conflict issue
+-   Much more...
 
 ### Removed
 
--   Stuff
+-   Some insignificant stuff in the code.
 
 ## [1.0.1] - 2024-03-27
 
