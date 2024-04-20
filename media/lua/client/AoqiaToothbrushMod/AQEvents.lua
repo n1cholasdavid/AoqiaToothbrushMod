@@ -35,12 +35,14 @@ local AQEvents                   = {}
 -- NOTE: Probably move these dummy structs to a more suitable location? Although I can't figure out where.
 
 ---@class AQPlayerModDataStruct
----@field _modVersion string | nil Tracks what version of the mod belongs to the mod data.
----@field daysBrushedCount number | nil Tracks the number of days CONSECUTIVELY the player has brushed their teeth at least once.
----@field daysBrushedToMax number | nil Tracks how many times player CONSECUTIVELY brushed teeth >= sandbox Max Value for n days.
----@field todayBrushCount number | nil Tracks how many times player brushed teeth today.
----@field totalBrushCount number | nil Tracks how many times player brushed teeth total.
----@field daysNotBrushed number | nil Tracks how many CONSECUTIVE times player didn't brush teeth total.
+---@field _modVersion string Tracks what version of the mod belongs to the mod data.
+---@field daysBrushedCount number Tracks the number of days CONSECUTIVELY the player has brushed their teeth at least once.
+---@field daysBrushedToMax number Tracks how many times player CONSECUTIVELY brushed teeth >= sandbox Max Value for n days.
+---@field todayBrushCount number Tracks how many times player brushed teeth today.
+---@field totalBrushCount number Tracks how many times player brushed teeth total.
+---@field daysNotBrushed number Tracks how many CONSECUTIVE times player didn't brush teeth total.
+---@field brushTeethNewMaxValue number Tracks the sandbox option "Brush Teeth Max Value" based on if the player has one of the traits.
+---@field timeLastBrushTenMins number Tracks how much time (in 10 minute intervals) since the last brush.
 local AQPlayerModDataStructDummy = {
     _modVersion = AQConstants.MOD_VERSION,
     daysBrushedCount = 0,
@@ -48,26 +50,28 @@ local AQPlayerModDataStructDummy = {
     todayBrushCount = 0,
     totalBrushCount = 0,
     daysNotBrushed = 0,
+    brushTeethNewMaxValue = 0,
+    timeLastBrushTenMins = 0,
 }
 ---@class AQSandboxVarsStruct
----@field DoTransferItemsOnUse boolean | nil
----@field DoDailyEffect boolean | nil
----@field DailyEffectType number | nil
----@field DailyEffectExponent number | nil
----@field DailyEffectAlternateExponent number | nil
----@field DailyEffectMaxValue number | nil
----@field DailyEffectAlternateMaxValue number | nil
----@field DailyEffectGracePeriod number | nil
----@field DoBrushTeethEffect boolean | nil
----@field BrushTeethEffectType number | nil
----@field BrushTeethEffectAmount number | nil
----@field BrushTeethEffectAlternateAmount number | nil
----@field BrushTeethTime number | nil
----@field BrushTeethMaxValue number | nil
----@field BrushTeethRequiredWater number | nil
----@field BrushTeethRequiredToothpaste number | nil
----@field GoodTraitCount number | nil
----@field BadTraitCount number | nil
+---@field DoTransferItemsOnUse boolean
+---@field DoDailyEffect boolean
+---@field DailyEffectType number
+---@field DailyEffectExponent number
+---@field DailyEffectAlternateExponent number
+---@field DailyEffectMaxValue number
+---@field DailyEffectAlternateMaxValue number
+---@field DailyEffectGracePeriod number
+---@field DoBrushTeethEffect boolean
+---@field BrushTeethEffectType number
+---@field BrushTeethEffectAmount number
+---@field BrushTeethEffectAlternateAmount number
+---@field BrushTeethTime number
+---@field BrushTeethMaxValue number
+---@field BrushTeethRequiredWater number
+---@field BrushTeethRequiredToothpaste number
+---@field GoodTraitCount number
+---@field BadTraitCount number
 local AQSandboxVarsStructDummy   = {
     DoTransferItemsOnUse = true,
     -- Daily Effect
@@ -107,6 +111,7 @@ function AQEvents.OnInitGlobalModData(newGame)
     -- If you're curious, ask me. If you don't care, just know this is fixed.
     -- Clean up your previous mistakes instead of letting the result rot in people's world saves!!!!!
     if ModData.exists(AQConstants.MOD_ID) then
+        AQUtils.logdebug("Found old global mod data. Removing...")
         ModData.remove(AQConstants.MOD_ID)
     end
 end
@@ -120,6 +125,9 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     ---@type AQPlayerModDataStruct
     local data = player:getModData()[AQConstants.MOD_ID]
 
+    ---@type AQSandboxVarsStruct
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+
     -- Has user created a new character?
     -- Has the user enabled the mod on an existing character?
     local newChar = (data == nil or data._modVersion == nil)
@@ -128,17 +136,8 @@ function AQEvents.OnCreatePlayer(playerNum, player)
         return
     end
 
-    -- Lazy nil/invalid data check
-    for k, _ in pairs(AQPlayerModDataStructDummy) do
-        for _, _ in pairs(data) do
-            if data[k] == nil then
-                player:getModData()[AQConstants.MOD_ID] = AQPlayerModDataStructDummy
-                return
-            end
-        end
-    end
-
     -- Outdated mod data check and merge
+    -- This keeps the old data values and merges them with the new table
     if data._modVersion ~= AQConstants.MOD_VERSION then
         AQUtils.logdebug("Mod data version mismatch." ..
             " Expected version=" .. AQConstants.MOD_VERSION ..
@@ -146,13 +145,29 @@ function AQEvents.OnCreatePlayer(playerNum, player)
             "; Merging old mod data with dummy mod data.")
 
         local dummy = AQPlayerModDataStructDummy
-        for k, v in pairs(data) do
-            if k ~= "_modVersion" then
-                dummy[k] = v
+        for k, v in pairs(dummy) do
+            if k ~= "modVersion" and data[k] ~= nil then
+                dummy[k] = data[k]
             end
         end
 
         player:getModData()[AQConstants.MOD_ID] = dummy
+        return
+    end
+
+    -- Lazy nil data check
+    -- This compares with the dummy struct for new data keys not in the table
+    for k, v in pairs(AQPlayerModDataStructDummy) do
+        if data[k] == nil then
+            AQUtils.logdebug("Found nil value in mod data. Adding defaults...")
+            data[k] = v
+        end
+    end
+
+    if data.brushTeethNewMaxValue == 0 then
+        -- Do some mod data stuff for cases where
+        local newMax = AQMoodles.calcMaxValue(sandboxVars, player)
+        data.brushTeethNewMaxValue = newMax
     end
 end
 
@@ -184,6 +199,8 @@ function AQEvents.EveryDays()
         data.daysBrushedCount = data.daysBrushedCount + 1
         data.daysNotBrushed = 0
     end
+    -- This is so player can brush their teeth when it's a new day
+    data.timeLastBrushTenMins = 999999
 
     -- Trait stuff is below.
     -- Trait logic is calculated daily because it closely relies on the amount of days not brushed.
@@ -205,12 +222,12 @@ function AQEvents.EveryDays()
     end
 
     -- Calc new brush count influenced by the trait
-    local newMax = sandboxVars.BrushTeethMaxValue
-    if player:HasTrait("GoldenBrusher") then
-        newMax = newMax / 2
-    elseif player:HasTrait("FoulBrusher") then
-        newMax = newMax * 2
-    end
+    local newMax = AQMoodles.calcMaxValue(sandboxVars, player)
+    data.brushTeethNewMaxValue = newMax
+
+    -- Reset moodle
+    local moodle = MoodleFactory.getMoodle("DirtyTeeth", player:getPlayerNum())
+    moodle:setValue(0.5)
 
     -- Using trait logic to update mod data
     if data.todayBrushCount ~= 0 then
@@ -259,6 +276,15 @@ function AQEvents.EveryDays()
     end
 end
 
+function AQEvents.EveryTenMinutes()
+    local player = getPlayer()
+
+    ---@type AQPlayerModDataStruct
+    local data = player:getModData()[AQConstants.MOD_ID]
+
+    data.timeLastBrushTenMins = data.timeLastBrushTenMins + 10
+end
+
 function AQEvents.register()
     Events.OnGameBoot.Add(AQEvents.OnGameBoot)
     Events.OnInitGlobalModData.Add(AQEvents.OnInitGlobalModData)
@@ -266,6 +292,7 @@ function AQEvents.register()
     Events.OnPlayerDeath.Add(AQEvents.OnPlayerDeath)
     Events.OnFillWorldObjectContextMenu.Add(AQWorldObjectContextMenu.createMenu)
     Events.EveryDays.Add(AQEvents.EveryDays)
+    Events.EveryTenMinutes.Add(AQEvents.EveryTenMinutes)
 end
 
 return AQEvents
