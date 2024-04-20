@@ -199,8 +199,6 @@ function AQEvents.EveryDays()
         data.daysBrushedCount = data.daysBrushedCount + 1
         data.daysNotBrushed = 0
     end
-    -- This is so player can brush their teeth when it's a new day
-    data.timeLastBrushTenMins = 999999
 
     -- Trait stuff is below.
     -- Trait logic is calculated daily because it closely relies on the amount of days not brushed.
@@ -215,10 +213,26 @@ function AQEvents.EveryDays()
     end
 
     -- Assign trait depending on mod data
-    if data.daysNotBrushed >= sandboxVars.BadTraitCount then
+    if data.daysNotBrushed >= sandboxVars.BadTraitCount and player:HasTrait("FoulBrusher") == false then
+        if player:HasTrait("GoldenBrusher") then
+            traits:remove("GoldenBrusher")
+        end
+
         traits:add("FoulBrusher")
-    elseif data.daysBrushedToMax >= sandboxVars.GoodTraitCount then
+    elseif data.daysBrushedToMax >= sandboxVars.GoodTraitCount and player:HasTrait("GoldenBrusher") == false then
+        if player:HasTrait("FoulBrusher") then
+            traits:remove("FoulBrusher")
+        end
+
         traits:add("GoldenBrusher")
+    end
+
+    -- Remove GoldenBrusher if we have haven't brushed
+    -- Remove FoulBrusher if we have brushed
+    if data.daysBrushedToMax == 0 and player:HasTrait("GoldenBrusher") then
+        traits:remove("GoldenBrusher")
+    elseif data.daysNotBrushed == 0 and player:HasTrait("FoulBrusher") then
+        traits:remove("FoulBrusher")
     end
 
     -- Calc new brush count influenced by the trait
