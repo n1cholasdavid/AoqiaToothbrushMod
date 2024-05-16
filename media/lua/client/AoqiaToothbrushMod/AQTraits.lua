@@ -4,13 +4,16 @@
 
 local TraitFactory = TraitFactory
 
+local AQLog = require("AoqiaToothbrushMod/AQLog")
 local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
 
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQTraits = {}
 
-function AQTraits.add()
+function AQTraits.init()
+    AQLog.debug("Creating traits...")
+
     TraitFactory.addTrait("GoldenBrusher",
         AQTranslations.UI_GoldenBrusherTrait, 2,
         AQTranslations.UI_GoldenBrusherTraitDesc, false)

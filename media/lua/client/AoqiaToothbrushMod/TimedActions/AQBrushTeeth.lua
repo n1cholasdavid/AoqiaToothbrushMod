@@ -10,24 +10,25 @@ local ISTakeWaterAction = ISTakeWaterAction
 local SandboxVars = SandboxVars
 
 require("MF_ISMoodle")
-local MoodleFactory = MF
+local MoodleFactory     = MF
 
-local AQConstants = require("AoqiaToothbrushMod/AQConstants")
-local AQMoodles = require("AoqiaToothbrushMod/AQMoodles")
-local AQUtils = require("AoqiaToothbrushMod/AQUtils")
+local AQConstants       = require("AoqiaToothbrushMod/AQConstants")
+local AQLog             = require("AoqiaToothbrushMod/AQLog")
+local AQMath            = require("AoqiaToothbrushMod/AQMath")
+local AQMoodles         = require("AoqiaToothbrushMod/AQMoodles")
 
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQBrushTeeth = ISBaseTimedAction:derive("AQBrushTeeth")
+local AQBrushTeeth      = ISBaseTimedAction:derive("AQBrushTeeth")
 
 ---@type IsoPlayer
-AQBrushTeeth.character = nil
+AQBrushTeeth.character  = nil
 ---@type IsoObject
-AQBrushTeeth.sink = nil
+AQBrushTeeth.sink       = nil
 ---@type ComboItem
 AQBrushTeeth.toothbrush = nil
 ---@type number
-AQBrushTeeth.time = nil
+AQBrushTeeth.time       = nil
 
 function AQBrushTeeth:isValid()
     return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTypeRecurse("Toothbrush")
@@ -37,14 +38,14 @@ end
 -- ---@param parameter any
 -- function AQBrushTeeth:animEvent(event, parameter)
 --     if event == "BrushTeethSwitch" then
---         AQUtils.logdebug("switch event played")
+--         AQLog.debug("switch event played")
 --         self:setActionAnim("BrushTeeth02")
 
 --         if self.sound then
 --             self.character:playSound("BrushTeeth02")
 --         end
 --     elseif event == "BrushTeethSwitch2" then
---         AQUtils.logdebug("switch event 2 played")
+--         AQLog.debug("switch event 2 played")
 --         self:setActionAnim("BrushTeeth")
 
 --         if self.sound then
@@ -55,6 +56,7 @@ end
 
 function AQBrushTeeth:update()
     self.character:faceThisObjectAlt(self.sink)
+    ---@diagnostic disable-next-line: param-type-mismatch
     self.character:setMetabolicTarget(Metabolics.LightDomestic)
 end
 
@@ -71,6 +73,7 @@ function AQBrushTeeth:start()
 end
 
 function AQBrushTeeth:stopSound()
+    ---@diagnostic disable-next-line: param-type-mismatch
     if self.sound and self.character:getEmitter():isPlaying(self.sound) then
         self.character:stopOrTriggerSound(self.sound)
     end
@@ -105,7 +108,7 @@ function AQBrushTeeth:perform()
 
     -- Update moodle
     local moodle = MoodleFactory.getMoodle("DirtyTeeth", self.character:getPlayerNum())
-    moodle:setValue(AQUtils.clamp(data.todayBrushCount, 0, newMax) / newMax)
+    moodle:setValue(AQMath.clamp(data.todayBrushCount, 0, newMax) / newMax)
 
     -- Brush Teeth Effect
     if sandboxVars.DoBrushTeethEffect and data.todayBrushCount <= newMax then
@@ -128,25 +131,11 @@ function AQBrushTeeth:perform()
         elseif effectType == 3 then
             stats:setStress(stress - stressAmount)
         else
-            AQUtils.logerror("Invalid BrushTeethEffectType enum value")
+            AQLog.error("Invalid BrushTeethEffectType enum value")
         end
     end
 
     ISBaseTimedAction.perform(self)
-end
-
----@return number
-function AQBrushTeeth.getRequiredToothpaste()
-    ---@type AQSandboxVarsStruct
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
- 
-    local requiredToothpaste = sandboxVars.BrushTeethRequiredToothpaste
-    if requiredToothpaste == nil then
-        return 1
-    end
-
-    return requiredToothpaste
 end
 
 -- ---@param toothpastes table<number, ComboItem>
@@ -159,20 +148,6 @@ end
 
 --     return total
 -- end
-
----@return number
-function AQBrushTeeth.getRequiredWater()
-    ---@type AQSandboxVarsStruct
-    ---@diagnostic disable-next-line: assign-type-mismatch
-    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
-
-    local requiredWater = sandboxVars.BrushTeethRequiredWater
-    if requiredWater == nil then
-        return 1
-    end
-
-    return requiredWater
-end
 
 ---@param character IsoPlayer
 ---@param sink IsoObject

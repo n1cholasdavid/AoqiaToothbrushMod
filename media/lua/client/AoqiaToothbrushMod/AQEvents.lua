@@ -4,14 +4,12 @@
 
 -- STD Lua Global Tables/Variables
 local math        = math
-
 -- STD Lua Global Functions
 local pairs       = pairs
 
 -- Vanilla Global Tables/Variables
 local Events      = Events
 local SandboxVars = SandboxVars
-
 -- Vanilla Global Functions
 local getPlayer   = getPlayer
 
@@ -21,12 +19,15 @@ local MoodleFactory              = MF
 
 -- My Mod Modules
 local AQWorldObjectContextMenu   = require("AoqiaToothbrushMod/AQUI/AQWorldObjectContextMenu")
+
 local AQConstants                = require("AoqiaToothbrushMod/AQConstants")
+local AQLog                      = require("AoqiaToothbrushMod/AQLog")
+local AQMath                     = require("AoqiaToothbrushMod/AQMath")
 local AQMoodles                  = require("AoqiaToothbrushMod/AQMoodles")
 local AQTraits                   = require("AoqiaToothbrushMod/AQTraits")
 local AQTranslations             = require("AoqiaToothbrushMod/AQTranslations")
 local AQTweaks                   = require("AoqiaToothbrushMod/AQTweaks")
-local AQUtils                    = require("AoqiaToothbrushMod/AQUtils")
+local AQTypes                    = require("AoqiaToothbrushMod/AQTypes")
 
 -- ------------------------------ Module Start ------------------------------ --
 
@@ -99,10 +100,10 @@ local AQSandboxVarsStructDummy   = {
 
 function AQEvents.OnGameBoot()
     -- NOTE: The order of these calls matter!
-    AQTranslations.update()
-    AQTraits.add()
-    AQMoodles.add()
-    AQTweaks.apply()
+    AQTranslations.init()
+    AQTraits.init()
+    AQMoodles.init()
+    AQTweaks.init()
 end
 
 ---@param newGame boolean
@@ -111,7 +112,7 @@ function AQEvents.OnInitGlobalModData(newGame)
     -- If you're curious, ask me. If you don't care, just know this is fixed.
     -- Clean up your previous mistakes instead of letting the result rot in people's world saves!!!!!
     if ModData.exists(AQConstants.MOD_ID) then
-        AQUtils.logdebug("Found old global mod data. Removing...")
+        AQLog.debug("Found old global mod data. Removing...")
         ModData.remove(AQConstants.MOD_ID)
     end
 end
@@ -126,6 +127,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     local data = player:getModData()[AQConstants.MOD_ID]
 
     ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
 
     -- Has user created a new character?
@@ -139,7 +141,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     -- Outdated mod data check and merge
     -- This keeps the old data values and merges them with the new table
     if data._modVersion ~= AQConstants.MOD_VERSION then
-        AQUtils.logdebug("Mod data version mismatch." ..
+        AQLog.debug("Mod data version mismatch." ..
             " Expected version=" .. AQConstants.MOD_VERSION ..
             " but got version=" .. data._modVersion ..
             "; Merging old mod data with dummy mod data.")
@@ -159,7 +161,7 @@ function AQEvents.OnCreatePlayer(playerNum, player)
     -- This compares with the dummy struct for new data keys not in the table
     for k, v in pairs(AQPlayerModDataStructDummy) do
         if data[k] == nil then
-            AQUtils.logdebug("Found nil value in mod data. Adding defaults...")
+            AQLog.debug("Found nil value in mod data. Adding defaults...")
             data[k] = v
         end
     end
@@ -207,7 +209,7 @@ function AQEvents.EveryDays()
     ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[AQConstants.MOD_ID]
     if not sandboxVars or sandboxVars.DoTransferItemsOnUse == nil then
-        AQUtils.logerror("No sandbox variables found. " ..
+        AQLog.error("No sandbox variables found. " ..
             "This should never happen so please make an issue on github or comment on the mod workshop page.")
         return
     end
@@ -265,14 +267,14 @@ function AQEvents.EveryDays()
     local stressMax = sandboxVars.DailyEffectAlternateMaxValue
 
     -- NOTE: For visualisation purposes, see https://www.desmos.com/calculator/awdp9rmxs8
-    local unhappyFormula = AQUtils.clamp(math.exp(
+    local unhappyFormula = AQMath.clamp(math.exp(
             unhappyRate * (data.daysNotBrushed - gracePeriod) /
-            (AQUtils.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
+            (AQTypes.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
         0,
         unhappyMax)
-    local stressFormula = AQUtils.clamp(math.exp(
+    local stressFormula = AQMath.clamp(math.exp(
             stressRate * (data.daysNotBrushed - gracePeriod) /
-            (AQUtils.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
+            (AQTypes.tonumber(data.daysNotBrushed >= (newMax / 2)) + 1)),
         0,
         stressMax)
 
@@ -286,7 +288,7 @@ function AQEvents.EveryDays()
     elseif effectType == 3 then
         stats:setStress(stats:getStress() + stressFormula)
     else
-        AQUtils.logerror("Invalid DailyEffectType enum value")
+        AQLog.error("Invalid DailyEffectType enum value")
     end
 end
 
@@ -300,6 +302,8 @@ function AQEvents.EveryTenMinutes()
 end
 
 function AQEvents.register()
+    AQLog.debug("Registering events...")
+
     Events.OnGameBoot.Add(AQEvents.OnGameBoot)
     Events.OnInitGlobalModData.Add(AQEvents.OnInitGlobalModData)
     Events.OnCreatePlayer.Add(AQEvents.OnCreatePlayer)

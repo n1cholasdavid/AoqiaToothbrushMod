@@ -5,6 +5,8 @@
 require("MF_ISMoodle")
 local MoodleFactory = MF
 
+local AQLog = require("AoqiaToothbrushMod/AQLog")
+
 -- ------------------------------ Module Start ------------------------------ --
 
 local AQMoodles = {}
@@ -25,7 +27,9 @@ function AQMoodles.calcMaxValue(sandboxVars, player)
     return max
 end
 
-function AQMoodles.add()
+function AQMoodles.init()
+    AQLog.debug("Creating moodles...")
+
     MoodleFactory.createMoodle("DirtyTeeth")
 end
 
