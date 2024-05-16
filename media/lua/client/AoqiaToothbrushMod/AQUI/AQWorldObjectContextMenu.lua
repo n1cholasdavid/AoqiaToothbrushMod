@@ -32,7 +32,7 @@ local AQWorldObjectContextMenu = {}
 ---@param player number
 ---@param waterObj IsoObject
 ---@param toothbrush ComboItem
----@param toothpaste ComboItem
+---@param toothpaste ComboItem|nil
 function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpaste)
     local playerObj = getSpecificPlayer(player)
 
@@ -40,16 +40,26 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
         return
     end
 
-    local time = SandboxVars[AQConstants.MOD_ID].BrushTeethTime
-    if AQBrushTeeth.getRequiredToothpaste() > 1 --[[ AQBrushTeeth.getToothpasteRemaining(toothpaste) ]] then
+    ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+
+    local time = sandboxVars.BrushTeethTime
+    if toothpaste == nil --[[or toothpaste < sandboxVars.BrushTeethRequiredToothpaste]] then
         time = time * 2
     end
 
-    if SandboxVars[AQConstants.MOD_ID].TransferItemsOnUse then
-        local items = ISInventoryPane.getActualItems({ toothbrush, toothpaste })
-        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[1])
-        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, items[2])
+    if sandboxVars.DoTransferItemsOnUse then
+        local toothbrushItem = ISInventoryPane.getActualItems({ toothbrush })
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothbrushItem[1])
+
+        if toothpaste ~= nil then
+            -- ISInventoryPane erroring because of getActualItems table? possibly toothpaste item invalid or fucky
+            local toothpasteItem = ISInventoryPane.getActualItems({ toothpaste })
+            ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpasteItem[1])
+        end
     end
+
     ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
 end
 
@@ -63,13 +73,18 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
     ---@type AQPlayerModDataStruct
     local data = player:getModData()[AQConstants.MOD_ID]
 
+    ---@type AQSandboxVarsStruct
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+
     if waterObj:getSquare():getBuilding() ~= player:getBuilding() then return end
     if instanceof(waterObj, "IsoClothingDryer") then return end
     if instanceof(waterObj, "IsoClothingWasher") then return end
     if instanceof(waterObj, "IsoCombinationWasherDryer") then return end
 
-    if not playerInv:containsTypeRecurse("Toothbrush") then return end
-    local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush")
+    local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush") or playerInv:getFirstTagRecurse("Toothbrush")
+    if toothbrush == nil then return end
+
     local toothpastes = playerInv:getItemsFromType("Toothpaste")
 
     -- Context menu shtuff
@@ -78,9 +93,9 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
-    local waterRequired = AQBrushTeeth.getRequiredWater()
+    local waterRequired = sandboxVars.BrushTeethRequiredWater
     local toothpasteRemaining = toothpastes:size()
-    local toothpasteRequired = AQBrushTeeth.getRequiredToothpaste()
+    local toothpasteRequired = sandboxVars.BrushTeethRequiredToothpaste
 
     -- local source = nil
     -- if source == nil then
