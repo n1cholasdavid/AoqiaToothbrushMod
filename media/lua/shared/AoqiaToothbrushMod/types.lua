@@ -4,11 +4,11 @@
 
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQTypes = {}
+local types = {}
 
 ---@param value number
 --- This function converts numbers/strings to booleans.
-function AQTypes.toboolean(value)
+function types.toboolean(value)
     if type(value) == "number" then
         return value == 1 and true or value == 0 and false
     elseif type(value) == "string" then
@@ -18,8 +18,8 @@ end
 
 ---@param value boolean
 --- This function converts booleans to numbers.
-function AQTypes.tonumber(value)
+function types.tonumber(value)
     return value == true and 1 or value == false and 0
 end
 
-return AQTypes
+return types
