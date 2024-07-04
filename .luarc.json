@@ -1,7 +1,18 @@
 {
     "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
     "workspace.library": [
-        "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid/media/lua",
+        // Utilities
+        "C:/github/AoqiaZomboidUtils/media/lua/shared",
+
+        // APIs and Frameworks
+        // null
+
+        // Vanilla Lua
+        // "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid/media/lua/client",
+        // "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid/media/lua/server",
+        // "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid/media/lua/shared",
+
+        // Umbrella
         "C:/Users/aoqia/AppData/Roaming/Code/User/globalStorage/sumneko.lua/addonManager/addons/umbrella/module/library"
     ],
     "runtime.version": "Lua 5.1",
@@ -78,18 +89,36 @@
         "codestyle-check": "Any"
     },
     "runtime.path": [
-        "server/?.lua",
         "shared/?.lua",
-        "client/?.lua"
+        "client/?.lua",
+        "server/?.lua"
     ],
     "completion.requireSeparator": "/",
     "runtime.builtin": {
+        "basic": "default",
+        "bit": "default",
+        "bit32": "default",
+        "builtin": "default",
+        "coroutine": "default",
         "debug": "disable",
+        "ffi": "default",
         "io": "disable",
-        "package": "disable"
+        "jit": "default",
+        "jit.profile": "default",
+        "jit.util": "default",
+        "math": "default",
+        "os": "default",
+        "package": "disable",
+        "string": "default",
+        "string.buffer": "default",
+        "table": "default",
+        "table.clear": "default",
+        "table.new": "default",
+        "utf8": "default"
     },
     "diagnostics.globals": [
-        "MF",
-        "TweakItem"
-    ]
+        "MF"
+    ],
+    "workspace.checkThirdParty": false,
+    "workspace.preloadFileSize": 800
 }
