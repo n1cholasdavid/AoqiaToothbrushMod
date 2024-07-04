@@ -3,9 +3,12 @@
 import fnmatch
 import os
 import shutil
+import sys
 
 SRC = "../"
 DEST = "../dist/"
+
+WORKSHOP = "../workshop/"
 
 EXCLUDE_PATTERNS = [
     # Itself
@@ -21,14 +24,30 @@ EXCLUDE_PATTERNS = [
     "SANDBOX_OPTIONS.md",
     # Blender files
     "*.blend1",
+    # Photoshop files
+    "*.psd",
     # Lua workshop libs
-    "ItemTweaker_Core.lua",
     "MF_ISMoodle.lua",
     "MF_MoodleScale.lua",
 ]
-EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts", "blender"]
+EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts", "blender", "workshop"]
 
-print("Generating workshop files...")
+print("Getting mod id...")
+
+MOD_ID = None
+with open(os.path.join(SRC, "mod.info"), "r", encoding="utf-8") as modinfo:
+    for line in modinfo.readlines():
+        if line.startswith("id="):
+            MOD_ID = line.removeprefix("id=")
+
+if MOD_ID is None:
+    print("Failed to find mod ID in mod.info.")
+    sys.exit(1)
+
+
+print("Generating dist files...")
+
+# Make and populate dist folder
 
 if not os.path.exists(DEST):
     os.makedirs(DEST)
@@ -50,4 +69,19 @@ for dirpath, dirnames, filenames in os.walk(SRC):
                 os.makedirs(os.path.dirname(dest_file), exist_ok=True)
                 shutil.copy2(src_file, dest_file)
 
-print("Workshop files generated successfully.")
+# Move contents of dist to the workshop folder
+
+Contents = os.path.join(WORKSHOP, "Contents")
+mods = os.path.join(Contents, "mods")
+mod_dir = os.path.join(mods, MOD_ID)
+if (
+    not os.path.exists(WORKSHOP)
+    or not os.path.exists(Contents)
+    or not os.path.exists(mods)
+    or not os.path.exists(mod_dir)
+):
+    sys.exit(1)
+
+shutil.copytree(DEST, mod_dir, dirs_exist_ok=True)
+
+print("Dist files generated successfully.")

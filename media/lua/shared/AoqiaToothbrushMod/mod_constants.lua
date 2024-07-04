@@ -2,14 +2,15 @@
 --                   Stores constants to be used everywhere.                  --
 -- -------------------------------------------------------------------------- --
 
+local logger = require("AoqiaZomboidUtils/logger")
+
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQConstants = {}
+local mod_constants = {}
 
-AQConstants.IS_DEBUG = getDebug() == true
-AQConstants.IS_LAST_STAND = getCore():getGameMode() == "LastStand"
+mod_constants.MOD_ID = "AoqiaToothbrushMod"
+mod_constants.MOD_VERSION = "1.2.0"
 
-AQConstants.MOD_ID = "AoqiaToothbrushMod"
-AQConstants.MOD_VERSION = "1.1.0"
+mod_constants.LOGGER = logger:new(mod_constants.MOD_ID)
 
-return AQConstants
+return mod_constants
