@@ -5,17 +5,19 @@
 require("MF_ISMoodle")
 local MoodleFactory = MF
 
-local AQLog = require("AoqiaToothbrushMod/AQLog")
+local mod_constants = require("AoqiaToothbrushMod/mod_constants")
+
+local logger = mod_constants.LOGGER
 
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQMoodles = {}
+local moodle_manager = {}
 
----@param sandboxVars AQSandboxVarsStruct
+---@param sandboxVars sandboxvars_struct
 ---@param player IsoPlayer
 ---@return number newMax
 --- Calculates the new BrushTeethMaxValue based on the player's current traits.
-function AQMoodles.calcMaxValue(sandboxVars, player)
+function moodle_manager.calc_max(sandboxVars, player)
     local max = sandboxVars.BrushTeethMaxValue
 
     if player:HasTrait("GoldenBrusher") then
@@ -27,10 +29,10 @@ function AQMoodles.calcMaxValue(sandboxVars, player)
     return max
 end
 
-function AQMoodles.init()
-    AQLog.debug("Creating moodles...")
+function moodle_manager.init()
+    logger.debug("Creating moodles...")
 
     MoodleFactory.createMoodle("DirtyTeeth")
 end
 
-return AQMoodles
+return moodle_manager
