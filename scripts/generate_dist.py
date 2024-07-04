@@ -3,6 +3,7 @@
 import fnmatch
 import os
 import shutil
+import sys
 
 SRC = "../"
 DEST = "../dist/"
@@ -23,12 +24,26 @@ EXCLUDE_PATTERNS = [
     "SANDBOX_OPTIONS.md",
     # Blender files
     "*.blend1",
+    # Photoshop files
+    "*.psd",
     # Lua workshop libs
-    "ItemTweaker_Core.lua",
     "MF_ISMoodle.lua",
     "MF_MoodleScale.lua",
 ]
 EXCLUDED_DIRS = [".git", ".vscode", "dist", "scripts", "blender", "workshop"]
+
+print("Getting mod id...")
+
+MOD_ID = None
+with open(os.path.join(SRC, "mod.info"), "r", encoding="utf-8") as modinfo:
+    for line in modinfo.readlines():
+        if line.startswith("id="):
+            MOD_ID = line.removeprefix("id=")
+
+if MOD_ID is None:
+    print("Failed to find mod ID in mod.info.")
+    sys.exit(1)
+
 
 print("Generating dist files...")
 
@@ -58,15 +73,15 @@ for dirpath, dirnames, filenames in os.walk(SRC):
 
 Contents = os.path.join(WORKSHOP, "Contents")
 mods = os.path.join(Contents, "mods")
-AoqiaToothbrushMod = os.path.join(mods, "AoqiaToothbrushMod")
+mod_dir = os.path.join(mods, MOD_ID)
 if (
     not os.path.exists(WORKSHOP)
     or not os.path.exists(Contents)
     or not os.path.exists(mods)
-    or not os.path.exists(AoqiaToothbrushMod)
+    or not os.path.exists(mod_dir)
 ):
-    quit()
+    sys.exit(1)
 
-shutil.copytree(DEST, AoqiaToothbrushMod, dirs_exist_ok=True)
+shutil.copytree(DEST, mod_dir, dirs_exist_ok=True)
 
 print("Dist files generated successfully.")
