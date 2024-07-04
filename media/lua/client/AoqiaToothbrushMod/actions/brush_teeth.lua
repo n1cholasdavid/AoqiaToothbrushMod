@@ -2,36 +2,34 @@
 --            A timed action for brushing teeth using a toothbrush.           --
 -- -------------------------------------------------------------------------- --
 
-local math = math
-
 require("TimedActions/ISBaseTimedAction")
 local ISBaseTimedAction = ISBaseTimedAction
 local ISTakeWaterAction = ISTakeWaterAction
 local SandboxVars = SandboxVars
 
 require("MF_ISMoodle")
-local MoodleFactory     = MF
+local MoodleFactory    = MF
 
-local AQConstants       = require("AoqiaToothbrushMod/AQConstants")
-local AQLog             = require("AoqiaToothbrushMod/AQLog")
-local AQMath            = require("AoqiaToothbrushMod/AQMath")
-local AQMoodles         = require("AoqiaToothbrushMod/AQMoodles")
+local mod_constants    = require("AoqiaToothbrushMod/mod_constants")
+local moodle_manager   = require("AoqiaToothbrushMod/moodle_manager")
+
+local logger           = mod_constants.LOGGER
 
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQBrushTeeth      = ISBaseTimedAction:derive("AQBrushTeeth")
+local brush_teeth      = ISBaseTimedAction:derive("brush_teeth")
 
 ---@type IsoPlayer
-AQBrushTeeth.character  = nil
+brush_teeth.character  = nil
 ---@type IsoObject
-AQBrushTeeth.sink       = nil
+brush_teeth.sink       = nil
 ---@type ComboItem
-AQBrushTeeth.toothbrush = nil
+brush_teeth.toothbrush = nil
 ---@type number
-AQBrushTeeth.time       = nil
+brush_teeth.time       = nil
 
-function AQBrushTeeth:isValid()
-    return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTypeRecurse("Toothbrush")
+function brush_teeth:isValid()
+    return self.sink:getObjectIndex() ~= -1 and self.character:getInventory():containsTagRecurse("Toothbrush")
 end
 
 -- ---@param event AnimEvent
@@ -54,44 +52,44 @@ end
 --     end
 -- end
 
-function AQBrushTeeth:update()
+function brush_teeth:update()
     self.character:faceThisObjectAlt(self.sink)
     ---@diagnostic disable-next-line: param-type-mismatch
     self.character:setMetabolicTarget(Metabolics.LightDomestic)
 end
 
-function AQBrushTeeth:waitToStart()
+function brush_teeth:waitToStart()
     -- Alt version makes character walk there I believe.
     self.character:faceThisObjectAlt(self.sink)
     return self.character:shouldBeTurning()
 end
 
-function AQBrushTeeth:start()
+function brush_teeth:start()
     self:setActionAnim("BrushTeeth")
     self:setOverrideHandModels("Base.Toothbrush", nil)
     self.sound = self.character:playSound("BrushTeeth")
 end
 
-function AQBrushTeeth:stopSound()
+function brush_teeth:stopSound()
     ---@diagnostic disable-next-line: param-type-mismatch
     if self.sound and self.character:getEmitter():isPlaying(self.sound) then
         self.character:stopOrTriggerSound(self.sound)
     end
 end
 
-function AQBrushTeeth:stop()
+function brush_teeth:stop()
     self:stopSound()
     ISBaseTimedAction.stop(self)
 end
 
-function AQBrushTeeth:perform()
+function brush_teeth:perform()
     self:stopSound()
     -- TODO: Uncomment this when toothpaste drainable item is handled.
     -- self.toothpastes[0]:Use()
     ISTakeWaterAction.SendTakeWaterCommand(self.character, self.sink, 1)
 
-    ---@type AQPlayerModDataStruct
-    local data = self.character:getModData()[AQConstants.MOD_ID]
+    ---@type moddata_struct
+    local data = self.character:getModData()[mod_constants.MOD_ID]
 
     -- Brush teeth mod data update
     data.todayBrushCount = data.todayBrushCount + 1
@@ -99,16 +97,16 @@ function AQBrushTeeth:perform()
     data.daysNotBrushed = 0
     data.timeLastBrushTenMins = 0
 
-    ---@type AQSandboxVarsStruct
+    ---@type sandboxvars_struct
     ---@diagnostic disable-next-line: assign-type-mismatch
-    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+    local sandboxVars = SandboxVars[mod_constants.MOD_ID]
 
-    local newMax = AQMoodles.calcMaxValue(sandboxVars, self.character)
+    local newMax = moodle_manager.calc_max(sandboxVars, self.character)
     data.brushTeethNewMaxValue = newMax
 
     -- Update moodle
     local moodle = MoodleFactory.getMoodle("DirtyTeeth", self.character:getPlayerNum())
-    moodle:setValue(AQMath.clamp(data.todayBrushCount, 0, newMax) / newMax)
+    moodle:setValue(math.min(math.max(data.todayBrushCount, 0), newMax) / newMax)
 
     -- Brush Teeth Effect
     if sandboxVars.DoBrushTeethEffect and data.todayBrushCount <= newMax then
@@ -131,7 +129,7 @@ function AQBrushTeeth:perform()
         elseif effectType == 3 then
             stats:setStress(stress - stressAmount)
         else
-            AQLog.error("Invalid BrushTeethEffectType enum value")
+            logger.error("Invalid BrushTeethEffectType enum value")
         end
     end
 
@@ -151,9 +149,10 @@ end
 
 ---@param character IsoPlayer
 ---@param sink IsoObject
----@param toothbrush ComboItem
+---@param toothbrush InventoryItem
+---@param toothpaste InventoryItem|nil
 ---@param time number
-function AQBrushTeeth:new(character, sink, toothbrush, toothpastes, time)
+function brush_teeth:new(character, sink, toothbrush, toothpaste, time)
     local o = {}
 
     setmetatable(o, self)
@@ -161,7 +160,7 @@ function AQBrushTeeth:new(character, sink, toothbrush, toothpastes, time)
     o.character        = character
     o.sink             = sink
     o.toothbrush       = toothbrush
-    o.toothpastes      = toothpastes
+    o.toothpaste       = toothpaste
     o.stopOnWalk       = true
     o.stopOnRun        = true
     o.forceProgressBar = true
@@ -174,4 +173,4 @@ function AQBrushTeeth:new(character, sink, toothbrush, toothpastes, time)
     return o
 end
 
-return AQBrushTeeth
+return brush_teeth
