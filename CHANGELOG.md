@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2024-07-04
+
+### Added
+
+-   Added 10 differently coloured toothbrush textures.
+-   Added 3 different toothbrush textures showing similarities to real world brands.
+-   Added the `Toothbrush` tag to `Base.Toothbrush`.
+-   Added the `Toothpaste` tag to `Base.Toothpaste`.
+-   Added a tooltip to show when the player has brushed their teeth too recently.
+-   Fixed a bug where you couldn't brush on certain sink objects (I hope).
+-   Fixed a bug that caused an error when brushing teeth.
+
+### Changed
+
+-   A small chunk of the code.
+-   Made the ToothpastesRequired sandbox option irrelevant for now as it's not needed.
+
+### Removed
+
+-   ItemTweakerAPI due to lack of a proper use-case when I can just inline the code myself.
+
 ## [1.1.0] - 2024-04-11
 
 ### Added
