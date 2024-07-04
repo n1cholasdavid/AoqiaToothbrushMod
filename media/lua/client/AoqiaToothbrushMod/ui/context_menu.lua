@@ -7,42 +7,45 @@ local string = string
 
 local ipairs = ipairs
 
-require("luautils")
 require("TimedActions/ISTimedActionQueue")
 require("ISUI/ISInventoryPaneContextMenu")
 require("ISUI/ISWorldObjectContextMenu")
-local luautils = luautils
-local ISInventoryPane = ISInventoryPane
-local ISInventoryPaneContextMenu = ISInventoryPaneContextMenu
+require("luautils")
+
 local ISTimedActionQueue = ISTimedActionQueue
+local ISInventoryPaneContextMenu = ISInventoryPaneContextMenu
 local ISWorldObjectContextMenu = ISWorldObjectContextMenu
+local luautils = luautils
+
 local SandboxVars = SandboxVars
 
 local instanceof = instanceof
 local getSpecificPlayer = getSpecificPlayer
 
-local AQBrushTeeth = require("AoqiaToothbrushMod/TimedActions/AQBrushTeeth")
-local AQConstants = require("AoqiaToothbrushMod/AQConstants")
-local AQTranslations = require("AoqiaToothbrushMod/AQTranslations")
+local constants = require("AoqiaZomboidUtils/constants")
+
+local brush_teeth = require("AoqiaToothbrushMod/actions/brush_teeth")
+
+local mod_constants = require("AoqiaToothbrushMod/mod_constants")
 
 -- ------------------------------ Module Start ------------------------------ --
 
-local AQWorldObjectContextMenu = {}
+local context_menu = {}
 
 ---@param player number
 ---@param waterObj IsoObject
----@param toothbrush ComboItem
----@param toothpaste ComboItem|nil
-function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, toothpaste)
+---@param toothbrush InventoryItem
+---@param toothpaste InventoryItem|nil
+function context_menu.on_brush_teeth(waterObj, player, toothbrush, toothpaste)
     local playerObj = getSpecificPlayer(player)
 
     if not waterObj:getSquare() or not luautils.walkAdj(playerObj, waterObj:getSquare(), true) then
         return
     end
 
-    ---@type AQSandboxVarsStruct
+    ---@type sandboxvars_struct
     ---@diagnostic disable-next-line: assign-type-mismatch
-    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+    local sandboxVars = SandboxVars[mod_constants.MOD_ID]
 
     local time = sandboxVars.BrushTeethTime
     if toothpaste == nil --[[or toothpaste < sandboxVars.BrushTeethRequiredToothpaste]] then
@@ -50,51 +53,47 @@ function AQWorldObjectContextMenu.onBrushTeeth(waterObj, player, toothbrush, too
     end
 
     if sandboxVars.DoTransferItemsOnUse then
-        local toothbrushItem = ISInventoryPane.getActualItems({ toothbrush })
-        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothbrushItem[1])
+        ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothbrush)
 
         if toothpaste ~= nil then
-            -- ISInventoryPane erroring because of getActualItems table? possibly toothpaste item invalid or fucky
-            local toothpasteItem = ISInventoryPane.getActualItems({ toothpaste })
-            ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpasteItem[1])
+            ISInventoryPaneContextMenu.transferIfNeeded(playerObj, toothpaste)
         end
     end
 
-    ISTimedActionQueue.add(AQBrushTeeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
+    ISTimedActionQueue.add(brush_teeth:new(playerObj, waterObj, toothbrush, toothpaste, time))
 end
 
 ---@param waterObj IsoObject
 ---@param playerNum number
 ---@param context ISContextMenu
-function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
+function context_menu.do_menu(waterObj, playerNum, context)
     local player = getSpecificPlayer(playerNum)
     local playerInv = player:getInventory()
 
-    ---@type AQPlayerModDataStruct
-    local data = player:getModData()[AQConstants.MOD_ID]
+    ---@type moddata_struct
+    local data = player:getModData()[mod_constants.MOD_ID]
 
-    ---@type AQSandboxVarsStruct
+    ---@type sandboxvars_struct
     ---@diagnostic disable-next-line: assign-type-mismatch
-    local sandboxVars = SandboxVars[AQConstants.MOD_ID]
+    local sandboxVars = SandboxVars[mod_constants.MOD_ID]
 
     if waterObj:getSquare():getBuilding() ~= player:getBuilding() then return end
     if instanceof(waterObj, "IsoClothingDryer") then return end
     if instanceof(waterObj, "IsoClothingWasher") then return end
     if instanceof(waterObj, "IsoCombinationWasherDryer") then return end
 
-    local toothbrush = playerInv:getItemFromTypeRecurse("Toothbrush") or playerInv:getFirstTagRecurse("Toothbrush")
+    local toothbrush = playerInv:getFirstTagRecurse("Toothbrush")
     if toothbrush == nil then return end
 
-    local toothpastes = playerInv:getItemsFromType("Toothpaste")
+    local toothpaste = playerInv:getFirstTagRecurse("Toothpaste")
 
     -- Context menu shtuff
-    local option = context:addOption(AQTranslations.ContextMenu_BrushTeeth, waterObj,
-        AQWorldObjectContextMenu.onBrushTeeth, playerNum, toothbrush, toothpastes)
+    local option = context:addOption(getText(string.format("ContextMenu_%s_BrushTeeth", mod_constants.MOD_ID)),
+        waterObj, context_menu.on_brush_teeth, playerNum, toothbrush, toothpaste)
     local tooltip = ISWorldObjectContextMenu.addToolTip()
 
     local waterRemaining = waterObj:getWaterAmount()
     local waterRequired = sandboxVars.BrushTeethRequiredWater
-    local toothpasteRemaining = toothpastes:size()
     local toothpasteRequired = sandboxVars.BrushTeethRequiredToothpaste
 
     -- local source = nil
@@ -106,26 +105,35 @@ function AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, playerNum, context)
     --     end
     -- end
 
-    if toothpasteRemaining < toothpasteRequired then
-        tooltip.description = tooltip.description .. AQTranslations.IGUI_WithoutToothpaste
+    if toothpaste == nil then
+        tooltip.description = tooltip.description ..
+            getText(string.format("IGUI_%s_WithoutToothpaste", mod_constants.MOD_ID))
     else
         tooltip.description = tooltip.description ..
-            string.format("%s: %d / %d", AQTranslations.IGUI_Toothpaste,
+            string.format("%s: %d / %d", getText(string.format("IGUI_%s_Toothpaste", mod_constants.MOD_ID)),
                 toothpasteRequired, toothpasteRequired)
     end
+
     tooltip.description = tooltip.description .. " <LINE> " ..
-        string.format("%s: %d / %d", AQTranslations.ContextMenu_WaterName,
+        string.format("%s: %d / %d", getText("ContextMenu_WaterName"),
             math.min(waterRemaining, waterRequired), waterRequired)
 
     local unhappyLevel = player:getBodyDamage():getUnhappynessLevel()
     if unhappyLevel > 80 then
-        tooltip.description = tooltip.description .. " <LINE> <RGB:1,0,0> " ..
-            AQTranslations.ContextMenu_TooDepressed
+        tooltip.description = tooltip.description .. " <LINE><RGB:1,0,0> " ..
+            getText(string.format("ContextMenu_%s_TooDepressed", mod_constants.MOD_ID))
     end
-    option.toolTip = tooltip
 
     local minBrushTime = (1440 / 10) / data.brushTeethNewMaxValue
-    if waterRemaining < 1 or unhappyLevel > 80 or (data.timeLastBrushTenMins < minBrushTime and data.todayBrushCount ~= 0) then
+    local too_recent = data.timeLastBrushTenMins < minBrushTime and data.todayBrushCount ~= 0
+    if too_recent then
+        tooltip.description = tooltip.description .. " <LINE><RGB:1,0,0> " ..
+            getText(string.format("ContextMenu_%s_TooRecent", mod_constants.MOD_ID))
+    end
+
+    option.toolTip = tooltip
+
+    if waterRemaining < 1 or unhappyLevel > 80 or too_recent then
         option.notAvailable = true
     end
 end
@@ -134,21 +142,22 @@ end
 ---@param context ISContextMenu
 ---@param worldobjects table<number, IsoObject>
 ---@param test boolean
-function AQWorldObjectContextMenu.createMenu(player, context, worldobjects, test)
-    local waterObj = nil
-    for i, v in ipairs(worldobjects) do
-        if v:hasWater() then
-            waterObj = v
+function context_menu.create_menu(player, context, worldobjects, test)
+    --- @type IsoObject
+    local water_obj = nil
+    for _, obj in ipairs(worldobjects) do
+        if obj:hasWater() then
+            water_obj = obj
         end
     end
 
-    if waterObj and not AQConstants.IS_LAST_STAND then
-        if test == true then return true end
+    if water_obj and constants.IS_LAST_STAND == false then
+        if test then return true end
 
-        if waterObj:hasWater() then
-            AQWorldObjectContextMenu.doBrushTeethMenu(waterObj, player, context)
+        if water_obj:hasWater() then
+            context_menu.do_menu(water_obj, player, context)
         end
     end
 end
 
-return AQWorldObjectContextMenu
+return context_menu
