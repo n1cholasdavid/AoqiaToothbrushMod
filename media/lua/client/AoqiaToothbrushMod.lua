@@ -4,17 +4,19 @@
 
 local getActivatedMods = getActivatedMods
 
-local AQEvents = require("AoqiaToothbrushMod/AQEvents")
-local AQLog = require("AoqiaToothbrushMod/AQLog")
+local events = require("AoqiaToothbrushMod/events")
+local mod_constants = require("AoqiaToothbrushMod/mod_constants")
+
+local logger = mod_constants.LOGGER
 
 -- ------------------------------- Entrypoint ------------------------------- --
 
 local activated_mods = getActivatedMods()
-if not activated_mods:contains("ItemTweakerAPI") or not activated_mods:contains("MoodleFramework") then
-    AQLog.error("Failed to find ItemTweakerAPI or MoodleFramework.")
+if activated_mods:contains("MoodleFramework") == false then
+    logger.error("Failed to find MoodleFramework.")
     return
 end
 
-AQEvents.register()
+events.register()
 
-AQLog.debug("Lua init done!")
+logger.debug("Lua init done!")
