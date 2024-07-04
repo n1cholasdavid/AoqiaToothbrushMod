@@ -2,11 +2,13 @@
 --                      The main entry point for the mod.                     --
 -- -------------------------------------------------------------------------- --
 
-local AQLog = require("AoqiaToothbrushMod/AQLog")
-local AQProceduralDistributions = require("AoqiaToothbrushMod/AQProceduralDistributions")
+local distributions = require("AoqiaToothbrushMod/distributions")
+local mod_constants = require("AoqiaToothbrushMod/mod_constants")
+
+local logger = mod_constants.LOGGER
 
 -- ------------------------------- Entrypoint ------------------------------- --
 
-AQProceduralDistributions.init()
+distributions.register()
 
-AQLog.debugServer("Lua init done!")
+logger.debug_server("Lua init done!")
