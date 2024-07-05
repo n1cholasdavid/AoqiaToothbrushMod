@@ -134,7 +134,7 @@ function events.every_days()
     ---@diagnostic disable-next-line: assign-type-mismatch
     local sandboxVars = SandboxVars[mod_constants.MOD_ID]
     if not sandboxVars or sandboxVars.DoTransferItemsOnUse == nil then
-        logger.error("No sandbox variables found. " ..
+        logger:error("No sandbox variables found. " ..
             "This should never happen so please make an issue on github or comment on the mod workshop page.")
         return
     end
@@ -217,7 +217,7 @@ function events.every_days()
     elseif effectType == 3 then
         stats:setStress(stats:getStress() + stressFormula)
     else
-        logger.error("Invalid DailyEffectType enum value")
+        logger:error("Invalid DailyEffectType enum value")
     end
 end
 
@@ -255,7 +255,7 @@ function events.create_player(playerNum, player)
     -- Outdated mod data check and merge
     -- This keeps the old data values and merges them with the new table
     if data._modVersion ~= mod_constants.MOD_VERSION then
-        logger.warn("Mod data version mismatch." ..
+        logger:warn("Mod data version mismatch." ..
             " Expected version=" .. mod_constants.MOD_VERSION ..
             " but got version=" .. data._modVersion ..
             "; Merging old mod data with dummy mod data.")
@@ -275,7 +275,7 @@ function events.create_player(playerNum, player)
     -- This compares with the dummy struct for new data keys not in the table
     for k, v in pairs(moddata_dummy_struct) do
         if data[k] == nil then
-            logger.info("Found nil value in mod data. Setting to default...")
+            logger:info("Found nil value in mod data. Setting to default...")
             data[k] = v
         end
     end
@@ -293,7 +293,7 @@ function events.init_global_moddata(newGame)
     -- If you're curious, ask me. If you don't care, just know this is fixed.
     -- Clean up your previous mistakes instead of letting the result rot in people's world saves!!!!!
     if ModData.exists(mod_constants.MOD_ID) then
-        logger.info("Found old global mod data. Removing...")
+        logger:info("Found old global mod data. Removing...")
         ModData.remove(mod_constants.MOD_ID)
     end
 end
@@ -305,8 +305,8 @@ function events.game_boot()
 end
 
 function events.register()
-    logger.debug("Registering events...")
-
+    logger:debug("Registering events...")
+    
     Events.EveryTenMinutes.Add(events.every_ten_minutes)
     Events.EveryDays.Add(events.every_days)
     Events.OnFillWorldObjectContextMenu.Add(context_menu.create_menu)

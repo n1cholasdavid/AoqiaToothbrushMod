@@ -13,7 +13,7 @@ local logger = mod_constants.LOGGER
 local trait_manager = {}
 
 function trait_manager.init()
-    logger.debug("Creating traits...")
+    logger:debug("Creating traits...")
 
     trait_factory.addTrait("GoldenBrusher",
         getText(string.format("UI_%s_GoldenBrusherTrait", mod_constants.MOD_ID)),

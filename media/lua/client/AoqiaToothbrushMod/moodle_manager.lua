@@ -30,7 +30,7 @@ function moodle_manager.calc_max(sandboxVars, player)
 end
 
 function moodle_manager.init()
-    logger.debug("Creating moodles...")
+    logger:debug("Creating moodles...")
 
     MoodleFactory.createMoodle("DirtyTeeth")
 end
