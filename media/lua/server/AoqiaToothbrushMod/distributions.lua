@@ -42,7 +42,7 @@ distributions.toothbrush.items = {
 }
 
 function distributions.register()
-    logger.debug_server("Adding custom items to loot table...")
+    logger:debug_server("Adding custom items to loot table...")
 
     for _, v in pairs(distributions.toothbrush.containers) do
         for k2, v2 in pairs(distributions.toothbrush.items) do

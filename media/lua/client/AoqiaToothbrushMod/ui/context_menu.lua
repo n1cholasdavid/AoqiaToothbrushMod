@@ -130,7 +130,7 @@ function context_menu.do_menu(waterObj, playerNum, context)
         tooltip.description = tooltip.description .. " <LINE><RGB:1,0,0> " ..
             getText(string.format("ContextMenu_%s_TooRecent", mod_constants.MOD_ID))
     end
-
+    
     option.toolTip = tooltip
 
     if waterRemaining < 1 or unhappyLevel > 80 or too_recent then

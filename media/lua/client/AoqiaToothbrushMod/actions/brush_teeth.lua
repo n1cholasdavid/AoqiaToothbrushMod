@@ -129,7 +129,7 @@ function brush_teeth:perform()
         elseif effectType == 3 then
             stats:setStress(stress - stressAmount)
         else
-            logger.error("Invalid BrushTeethEffectType enum value")
+            logger:error("Invalid BrushTeethEffectType enum value")
         end
     end
 

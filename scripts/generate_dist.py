@@ -71,15 +71,11 @@ for dirpath, dirnames, filenames in os.walk(SRC):
 
 # Move contents of dist to the workshop folder
 
-Contents = os.path.join(WORKSHOP, "Contents")
+real_workshop = os.path.join(WORKSHOP, MOD_ID)
+Contents = os.path.join(real_workshop, "Contents")
 mods = os.path.join(Contents, "mods")
 mod_dir = os.path.join(mods, MOD_ID)
-if (
-    not os.path.exists(WORKSHOP)
-    or not os.path.exists(Contents)
-    or not os.path.exists(mods)
-    or not os.path.exists(mod_dir)
-):
+if os.path.exists(mod_dir):
     sys.exit(1)
 
 shutil.copytree(DEST, mod_dir, dirs_exist_ok=True)

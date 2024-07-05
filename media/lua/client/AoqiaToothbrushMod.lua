@@ -13,10 +13,10 @@ local logger = mod_constants.LOGGER
 
 local activated_mods = getActivatedMods()
 if activated_mods:contains("MoodleFramework") == false then
-    logger.error("Failed to find MoodleFramework.")
+    logger:error("Failed to find MoodleFramework.")
     return
 end
 
 events.register()
 
-logger.debug("Lua init done!")
+logger:debug("Lua init done!")

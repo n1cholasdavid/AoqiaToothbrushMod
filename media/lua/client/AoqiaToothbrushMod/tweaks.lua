@@ -13,7 +13,7 @@ local logger = mod_constants.LOGGER
 local tweaks = {}
 
 function tweaks.init()
-    logger.debug("Applying tweaks...")
+    logger:debug("Applying tweaks...")
 
     local script_manager = getScriptManager()
     local tweak_table = {

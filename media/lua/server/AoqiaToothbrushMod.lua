@@ -11,4 +11,4 @@ local logger = mod_constants.LOGGER
 
 distributions.register()
 
-logger.debug_server("Lua init done!")
+logger:debug_server("Lua init done!")

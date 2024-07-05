@@ -4,4 +4,4 @@ description=This is a toothbrush mod and it's completely open-source. The idea w
 poster=poster.png
 require=AoqiaZomboidUtils,MoodleFramework
 versionMin=41.78.16
-modVersion=1.2.0
+modVersion=1.2.1
